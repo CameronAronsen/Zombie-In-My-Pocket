@@ -43,7 +43,7 @@ def main():
     player = Player()
     game = Game(player)
     game.get_game()
-    game.get_game()
+
 
 if __name__ == "__main__":
     main()
