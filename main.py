@@ -1,7 +1,13 @@
 class Game:
-    def __init__(self, player, time=9):
+    def __init__(self, player, time=9, tiles=None, available_tiles=None):
+        if available_tiles is None:
+            available_tiles = []  # Will contain a list of all available tiles
+        if tiles is None:
+            tiles = {}  # Tiles dictionary will have the x and y coords as the key and the Tile object as the value
         self.player = player
         self.time = time
+        self.available_tiles = available_tiles
+        self.tiles = tiles
 
     def draw_card(self):
         pass
@@ -35,8 +41,8 @@ class DevCards:
 
 
 class Tile:
-    def __init__(self):
-        pass
+    def __init__(self, doors):
+        self.doors = doors
 
 
 def main():
