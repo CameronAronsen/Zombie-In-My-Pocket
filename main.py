@@ -56,8 +56,11 @@ class DevCards:
 
 
 class Tile:
-    def __init__(self, name, entrance=None, ex=None):
+    def __init__(self, name, x=0, y=0, effect=None, entrance=None, ex=None):
         self.name = name
+        self.x = x
+        self.y = y
+        self.effect = effect
         self.entrance = entrance
         self.exit = ex
 
@@ -69,21 +72,21 @@ class Tile:
 
 
 class IndoorTile(Tile):
-    def __init__(self, name, entrance=None, ex=None):
+    def __init__(self, name, x=0, y=0, effect=None, entrance=None, ex=None):
         self.type = "Indoor"
-        super().__init__(name, entrance, ex)
+        super().__init__(name, x, y, effect, entrance, ex)
 
     def __repr__(self):
-        return f'This tile is {self.name}, {self.entrance}, {self.exit}, {self.type}'
+        return f'This tile is {self.name}, {self.entrance}, {self.exit}, {self.type}, {self.x} {self.y} {self.effect}'
 
 
 class OutdoorTile(Tile):
-    def __init__(self, name, entrance=None, ex=None):
+    def __init__(self, name, x=0, y=0, effect=None, entrance=None, ex=None):
         self.type = "Outdoor"
-        super().__init__(name, entrance, ex)
+        super().__init__(name, x, y, effect, entrance, ex)
 
     def __repr__(self):
-        return f'This tile is {self.name}, {self.entrance}, {self.exit}, {self.type}'
+        return f'This tile is {self.name}, {self.entrance}, {self.exit}, {self.type}, {self.x} {self.y} {self.effect}'
 
 
 def main():
