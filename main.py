@@ -15,11 +15,14 @@ class Game:
 
     def start_game(self):
         for tile in self.available_tiles:
-            if tile.name == 'Patio':
+            if tile.name == 'Foyer':
                 tile.set_exit(dir.NORTH)
                 patio = tile
-                self.tiles[(patio.x, patio.y)] = patio
+                self.tiles[patio.position] = patio
+                self.available_tiles.pop(self.available_tiles.index(tile))
                 break
+        print(self.tiles)
+        print(self.available_tiles)
 
     def draw_card(self):
         pass
@@ -43,7 +46,7 @@ class Game:
 
 
 class Player:
-    def __init__(self, attack=1, health=6):
+    def __init__(self, attack=1, health=6, position=(0, 0)):
         self.attack = attack
         self.health = health
 
@@ -66,10 +69,9 @@ class DevCards:
 
 
 class Tile:
-    def __init__(self, name, x=0, y=0, effect=None, entrance=None, ex=None):
+    def __init__(self, name, position=(0, 0), effect=None, entrance=None, ex=None):
         self.name = name
-        self.x = x
-        self.y = y
+        self.position = position
         self.effect = effect
         self.entrance = entrance
         self.exit = ex
@@ -80,31 +82,28 @@ class Tile:
     def set_entrance(self, direction):
         self.entrance = direction
 
-    def set_x(self, x):
-        self.x = x
-
-    def set_y(self, y):
-        self.y = y
+    def set_position(self, x, y):
+        self.position = (x, y)
 
 
 class IndoorTile(Tile):
-    def __init__(self, name, effect=None, x=0, y=0, entrance=None, ex=None):
+    def __init__(self, name, effect=None, position=(0, 0), entrance=None, ex=None):
         self.type = "Indoor"
-        super().__init__(name, x, y, effect, entrance, ex)
+        super().__init__(name, position, effect, entrance, ex)
 
     def __repr__(self):
         return f'This tile is {self.name}, {self.entrance}, {self.exit}, {self.type},' \
-               f' {self.x} {self.y} {self.effect} \n'
+               f' {self.position}  {self.effect} \n'
 
 
 class OutdoorTile(Tile):
-    def __init__(self, name, effect=None, x=0, y=0, entrance=None, ex=None):
+    def __init__(self, name, effect=None, position=(0, 0), entrance=None, ex=None):
         self.type = "Outdoor"
-        super().__init__(name, x, y, effect, entrance, ex)
+        super().__init__(name, position, effect, entrance, ex)
 
     def __repr__(self):
-        return f'This tile is {self.name}, {self.entrance}, {self.exit},' \
-               f' {self.type}, {self.x}, {self.y}, {self.effect} \n'
+        return f'This tile is {self.name}, {self.entrance}, {self.exit}, {self.type},' \
+               f' {self.position}  {self.effect} \n'
 
 
 def main():
