@@ -1,0 +1,15 @@
+Start Game 
+Ask the player 
+Ask the player to move 
+Player inputs N S E W  
+Check that there is a door in the input direction
+if theres a door there draw a new card depending on if the player is indoor or outdoor
+allow to player to rotate the card
+when the player has rotaded as they like allow the card to be placed
+check before placing that a door lines up with the previous rooms doors
+if they line up place the tile and move the player to the newly placed tile
+
+
+draw tile should
+take a direction
+draw a card, set its x and y value, set it as the current tile

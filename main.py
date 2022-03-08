@@ -20,7 +20,7 @@ class Game:
 
     def start_game(self):
         for tile in self.indoor_tiles:
-            if tile.name == 'Foyer':  # Game always starts in the Foyer at 0,0
+            if tile.name == 'Foyer':  # Game always starts in the Foyer
                 self.current_tile = tile
                 self.indoor_tiles.pop(self.indoor_tiles.index(tile))
                 break
@@ -28,8 +28,8 @@ class Game:
     def get_game(self):
         print(self.tiles)
         return print(f'The player has {self.player.get_health()} health and {self.player.get_attack()} attack the '
-                     f'time is {self.time}, the player is at {self.player.get_x(), self.player.get_y()} or the'
-                     f' {self.current_tile}')
+                     f'time is {self.time}, player is at {self.player.get_x(), self.player.get_y()} the current tile'
+                     f' {self.current_tile} the player is at {self.get_current_tile()}')
 
     def load_tiles(self):  # Needs Error handling in this method
         excel_data = pd.read_excel('Tiles.xlsx')
@@ -45,17 +45,21 @@ class Game:
                 new_tile = IndoorTile(tile[0], tile[1], doors)
                 self.indoor_tiles.append(new_tile)
 
-    def draw_indoor_tile(self, x, y):
-        tile = random.choice(self.indoor_tiles)  # Chooses a random outdoor tile and places it
-        tile.set_x(x)
-        tile.set_y(y)
-        self.current_tile = tile
-
-    def draw_outdoor_tile(self, x, y):
-        tile = random.choice(self.outdoor_tiles)  # Chooses a random outdoor tile and places it
-        tile.set_x(x)
-        tile.set_y(y)
-        self.current_tile = tile
+    def draw_tile(self, direction):
+        if self.check_move_validity(direction):
+            if self.current_tile.type == "Indoor":  # will need to be changed for the dining room
+                tile = random.choice(self.indoor_tiles)  # Chooses a random indoor tile
+            elif self.current_tile.type == "Outdoor":  # will need to be changed for the patio
+                tile = random.choice(self.outdoor_tiles)  # Chooses a random outdoor tile
+            if direction == d.NORTH:
+                tile.set_y(tile.y - 1)
+            if direction == d.SOUTH:
+                tile.set_y(tile.y + 1)
+            if direction == d.NORTH:
+                tile.set_x(tile.x - 1)
+            if direction == d.NORTH:
+                tile.set_x(tile.x + 1)
+            self.current_tile = tile
 
     def place_tile(self):
         tile = self.current_tile
@@ -70,13 +74,34 @@ class Game:
 
     def move_player(self, direction):
         if direction == d.NORTH:
-            self.player.set_y(self.player.get_y() + 1)
+            if self.check_move_validity(d.NORTH):
+                self.player.set_y(self.player.get_y() - 1)
         if direction == d.SOUTH:
-            self.player.set_y(self.player.get_y() - 1)
+            if self.check_move_validity(d.SOUTH):
+                self.player.set_y(self.player.get_y() + 1)
         if direction == d.EAST:
-            self.player.set_y(self.player.get_x() + 1)
+            if self.check_move_validity(d.EAST):
+                self.player.set_y(self.player.get_x() - 1)
         if direction == d.WEST:
-            self.player.set_y(self.player.get_x() - 1)
+            if self.check_move_validity(d.WEST):
+                self.player.set_y(self.player.get_x() + 1)
+        else:
+            print("Invalid Input")
+
+    def check_move_validity(self, direction):
+        if direction == d.NORTH:
+            if d.SOUTH in self.current_tile.doors and d.NORTH in self.current_tile.doors:
+                return True
+        if direction == d.SOUTH:
+            if d.NORTH in self.current_tile.doors and d.SOUTH in self.current_tile.doors:
+                return True
+        if direction == d.EAST:
+            if d.WEST in self.current_tile.doors and d.EAST in self.current_tile.doors:
+                return True
+        if direction == d.WEST:
+            if d.EAST in self.current_tile.doors and d.WEST in self.current_tile.doors:
+                return True
+        return False
 
     def rotate(self):
         tile = self.current_tile
@@ -97,11 +122,11 @@ class Game:
 
 
 class Player:
-    def __init__(self, attack=1, health=6, x=0, y=0):
+    def __init__(self, attack=1, health=6, x=16, y=16):
         self.attack = attack
         self.health = health
-        self.x = x  # x Will represent the players position horizontally starts at 0
-        self.y = y  # y will represent the players position vertically starts at 0
+        self.x = x  # x Will represent the players position horizontally starts at 16
+        self.y = y  # y will represent the players position vertically starts at 16
 
     def get_health(self):
         return self.health
@@ -134,7 +159,7 @@ class DevCards:
 
 
 class Tile:
-    def __init__(self, name, x=0, y=0, effect=None, doors=None):
+    def __init__(self, name, x=16, y=16, effect=None, doors=None):
         if doors is None:
             doors = []
         self.name = name
@@ -165,7 +190,7 @@ class Tile:
 
 
 class IndoorTile(Tile):
-    def __init__(self, name, effect=None, doors=None, x=0, y=0):
+    def __init__(self, name, effect=None, doors=None, x=16, y=16):
         if doors is None:
             doors = []
         self.type = "Indoor"
@@ -177,7 +202,7 @@ class IndoorTile(Tile):
 
 
 class OutdoorTile(Tile):
-    def __init__(self, name, effect=None, doors=None, x=0, y=0):
+    def __init__(self, name, effect=None, doors=None, x=16, y=16):
         if doors is None:
             doors = []
         self.type = "Outdoor"
@@ -193,12 +218,12 @@ def main():
     game = Game(player)
     game.load_tiles()
     game.start_game()
-    game.get_game()
     game.rotate()
     game.rotate()
     game.rotate()
-    game.get_game()
     game.place_tile()
+    game.draw_tile(d.NORTH)
+    game.draw_tile(d.SOUTH)
     game.get_game()
 
 
