@@ -1,10 +1,14 @@
 import random
+from typing import Optional
+
 from directions import Direction as d
 import pandas as pd
+import cmd
 
 
 class Game:
-    def __init__(self, player, time=9, game_map=None, indoor_tiles=None, outdoor_tiles=None, current_tile=None):
+    def __init__(self, player, time=9, game_map=None, indoor_tiles=None, outdoor_tiles=None, chosen_tile=None,
+                 state="Starting", current_move_direction=None):
         if indoor_tiles is None:
             indoor_tiles = []  # Will contain a list of all available indoor tiles
         if outdoor_tiles is None:
@@ -16,20 +20,23 @@ class Game:
         self.indoor_tiles = indoor_tiles
         self.outdoor_tiles = outdoor_tiles
         self.tiles = game_map
-        self.current_tile = current_tile
+        self.chosen_tile = chosen_tile
+        self.state = state
+        self.current_move_direction = current_move_direction
 
     def start_game(self):
+        self.load_tiles()
         for tile in self.indoor_tiles:
-            if tile.name == 'Foyer':  # Game always starts in the Foyer at 0,0
-                self.current_tile = tile
+            if tile.name == 'Foyer':  # Game always starts in the Foyer at 16,16
+                self.chosen_tile = tile
+                self.state = "Rotating"
                 self.indoor_tiles.pop(self.indoor_tiles.index(tile))
                 break
 
     def get_game(self):
         print(self.tiles)
-        return print(f'The player has {self.player.get_health()} health and {self.player.get_attack()} attack the '
-                     f'time is {self.time}, the player is at {self.player.get_x(), self.player.get_y()} or the'
-                     f' {self.current_tile}')
+        return print(f'the player is at {self.player.get_x(), self.player.get_y()}'
+                     f' the chosen tile is {self.chosen_tile.name}, {self.chosen_tile.doors} the state is {self.state}')
 
     def load_tiles(self):  # Needs Error handling in this method
         excel_data = pd.read_excel('Tiles.xlsx')
@@ -45,21 +52,81 @@ class Game:
                 new_tile = IndoorTile(tile[0], tile[1], doors)
                 self.indoor_tiles.append(new_tile)
 
-    def draw_indoor_tile(self, x, y):
-        tile = random.choice(self.indoor_tiles)  # Chooses a random outdoor tile and places it
-        tile.set_x(x)
-        tile.set_y(y)
-        self.current_tile = tile
+    def draw_tile(self, x, y):
+        if self.chosen_tile.type == "Indoor":
+            tile = random.choice(self.indoor_tiles)  # Chooses a random indoor tile and places it
+            tile.set_x(x)
+            tile.set_y(y)
+            self.chosen_tile = tile
+            self.indoor_tiles.pop(self.indoor_tiles.index(tile))
+        elif self.chosen_tile.type == "Outdoor":
+            tile = random.choice(self.indoor_tiles)
+            tile.set_x(x)
+            tile.set_y(y)
+            self.chosen_tile = tile
+            self.outdoor_tiles.pop(self.outdoor_tiles.index(tile))
 
-    def draw_outdoor_tile(self, x, y):
-        tile = random.choice(self.outdoor_tiles)  # Chooses a random outdoor tile and places it
-        tile.set_x(x)
-        tile.set_y(y)
-        self.current_tile = tile
+    def move_player(self, x, y):
+        self.player.set_y(y)
+        self.player.set_x(x)
+        self.state = "Drawing Card"
 
-    def place_tile(self):
-        tile = self.current_tile
-        self.tiles[(tile.x, tile.y)] = tile
+    def select_move(self, direction):
+        x, y = self.get_destination_coords(direction)
+        if self.check_for_door(direction):  # If there's a door where the player tried to move
+            if self.check_for_room(x, y) is False:
+                self.draw_tile(x, y)
+                self.current_move_direction = direction
+                self.state = "Rotating"
+            if self.check_for_room(x, y):
+                self.current_move_direction = direction
+                self.move_player(x, y)
+
+    def get_destination_coords(self, direction):  # Gets the x and y value of the proposed move
+        if direction == d.NORTH:
+            return self.player.get_x(), self.player.get_y() - 1
+        if direction == d.SOUTH:
+            return self.player.get_x(), self.player.get_y() + 1
+        if direction == d.EAST:
+            return self.player.get_x() + 1, self.player.get_y()
+        if direction == d.WEST:
+            return self.player.get_x() - 1, self.player.get_y()
+
+    def check_for_door(self, direction):  # Takes a direction and checks if the current room has a door there
+        if direction in self.get_current_tile().doors:
+            return True
+        else:
+            return False
+
+    def check_for_room(self, x, y):  # Takes a move direction and checks if there is a room there
+        if (x, y) not in self.tiles:
+            return False
+        else:
+            self.chosen_tile = self.tiles[(x, y)]
+            return True
+
+    def check_doors_align(self, direction):
+        if self.chosen_tile.name == "Foyer":
+            return True
+        if direction == d.NORTH:
+            if d.SOUTH not in self.chosen_tile.doors:
+                return False
+        if direction == d.SOUTH:
+            if d.NORTH not in self.chosen_tile.doors:
+                return False
+        if direction == d.EAST:
+            if d.WEST not in self.chosen_tile.doors:
+                return False
+        if direction == d.WEST:
+            if d.EAST not in self.chosen_tile.doors:
+                return False
+        else:
+            return True
+
+    def place_tile(self, x, y):
+        tile = self.chosen_tile
+        self.tiles[(x, y)] = tile
+        self.state = "Moving"
         if tile.type == "Outdoor":
             self.outdoor_tiles.pop(self.outdoor_tiles.index(tile))
         elif tile.type == "indoor":
@@ -68,19 +135,12 @@ class Game:
     def get_current_tile(self):  # returns the current tile that the player is at
         return self.tiles[self.player.get_x(), self.player.get_y()]
 
-    def move_player(self, direction):
-        if direction == d.NORTH:
-            self.player.set_y(self.player.get_y() + 1)
-        if direction == d.SOUTH:
-            self.player.set_y(self.player.get_y() - 1)
-        if direction == d.EAST:
-            self.player.set_y(self.player.get_x() + 1)
-        if direction == d.WEST:
-            self.player.set_y(self.player.get_x() - 1)
-
     def rotate(self):
-        tile = self.current_tile
+        tile = self.chosen_tile
         tile.rotate_tile()
+
+    def draw_dev_card(self):
+        pass
 
     @staticmethod
     def resolve_doors(n, e, s, w):
@@ -97,11 +157,11 @@ class Game:
 
 
 class Player:
-    def __init__(self, attack=1, health=6, x=0, y=0):
+    def __init__(self, attack=1, health=6, x=16, y=16):
         self.attack = attack
         self.health = health
-        self.x = x  # x Will represent the players position horizontally starts at 0
-        self.y = y  # y will represent the players position vertically starts at 0
+        self.x = x  # x Will represent the players position horizontally starts at 16
+        self.y = y  # y will represent the players position vertically starts at 16
 
     def get_health(self):
         return self.health
@@ -134,7 +194,7 @@ class DevCards:
 
 
 class Tile:
-    def __init__(self, name, x=0, y=0, effect=None, doors=None):
+    def __init__(self, name, x=16, y=16, effect=None, doors=None):
         if doors is None:
             doors = []
         self.name = name
@@ -165,7 +225,7 @@ class Tile:
 
 
 class IndoorTile(Tile):
-    def __init__(self, name, effect=None, doors=None, x=0, y=0):
+    def __init__(self, name, effect=None, doors=None, x=16, y=16):
         if doors is None:
             doors = []
         self.type = "Indoor"
@@ -177,7 +237,7 @@ class IndoorTile(Tile):
 
 
 class OutdoorTile(Tile):
-    def __init__(self, name, effect=None, doors=None, x=0, y=0):
+    def __init__(self, name, effect=None, doors=None, x=16, y=16):
         if doors is None:
             doors = []
         self.type = "Outdoor"
@@ -188,19 +248,59 @@ class OutdoorTile(Tile):
                f' {self.x}, {self.y}, {self.effect} \n'
 
 
-def main():
+class Commands(cmd.Cmd):
     player = Player()
     game = Game(player)
-    game.load_tiles()
-    game.start_game()
-    game.get_game()
-    game.rotate()
-    game.rotate()
-    game.rotate()
-    game.get_game()
-    game.place_tile()
-    game.get_game()
+
+    def do_start(self, line):
+        if self.game.state == "Starting":
+            self.game.start_game()
+            self.game.get_game()
+        else:
+            print("Game has already Started")
+
+    def do_rotate(self, line):
+        if self.game.state == "Rotating":
+            self.game.rotate()
+            self.game.get_game()
+
+    def do_place(self, line):
+        if self.game.state == "Rotating":
+            if self.game.chosen_tile.name == "Foyer":
+                self.game.place_tile(16, 16)
+                self.game.get_game()
+            else:
+                if self.game.check_doors_align(self.game.current_move_direction):
+                    self.game.place_tile(self.game.chosen_tile.x, self.game.chosen_tile.y)
+                    self.game.move_player(self.game.chosen_tile.x, self.game.chosen_tile.y)
+                    self.game.get_game()
+                else:
+                    print("Doors Dont Align")
+
+    def do_n(self, line):
+        if self.game.state == "Moving":
+            self.game.select_move(d.NORTH)
+            self.game.get_game()
+
+    def do_s(self, line):
+        if self.game.state == "Moving":
+            self.game.select_move(d.SOUTH)
+            self.game.get_game()
+
+    def do_e(self, line):
+        if self.game.state == "Moving":
+            self.game.select_move(d.EAST)
+            self.game.get_game()
+
+    def do_w(self, line):
+        if self.game.state == "Moving":
+            self.game.select_move(d.WEST)
+            self.game.get_game()
+
+    def do_draw(self):
+        if self.game.state == "Drawing Card":
+            self.game.draw_dev_card
 
 
 if __name__ == "__main__":
-    main()
+    Commands().cmdloop()
