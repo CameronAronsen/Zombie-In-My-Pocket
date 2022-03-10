@@ -1,6 +1,4 @@
 import random
-from typing import Optional
-
 from directions import Direction as d
 import pandas as pd
 import cmd
@@ -36,7 +34,8 @@ class Game:
     def get_game(self):
         print(self.tiles)
         return print(f'the player is at {self.player.get_x(), self.player.get_y()}'
-                     f' the chosen tile is {self.chosen_tile.name}, {self.chosen_tile.doors} the state is {self.state}')
+                     f' the chosen tile is {self.chosen_tile.name}, {self.chosen_tile.doors}'
+                     f' the state is {self.state} ENTRANCE {self.chosen_tile.entrance}')
 
     def load_tiles(self):  # Needs Error handling in this method
         excel_data = pd.read_excel('Tiles.xlsx')
@@ -47,19 +46,23 @@ class Game:
             doors = self.resolve_doors(tile[3], tile[4], tile[5], tile[6])
             if tile[2] == "Outdoor":
                 new_tile = OutdoorTile(tile[0], tile[1], doors)
+                if tile[0] == "Patio":
+                    new_tile.set_entrance(d.NORTH)
                 self.outdoor_tiles.append(new_tile)
             if tile[2] == "Indoor":
                 new_tile = IndoorTile(tile[0], tile[1], doors)
+                if tile[0] == "Dining Room":
+                    new_tile.set_entrance(d.NORTH)
                 self.indoor_tiles.append(new_tile)
 
     def draw_tile(self, x, y):
-        if self.chosen_tile.type == "Indoor":
+        if self.get_current_tile().type == "Indoor":
             tile = random.choice(self.indoor_tiles)  # Chooses a random indoor tile and places it
             tile.set_x(x)
             tile.set_y(y)
             self.chosen_tile = tile
             self.indoor_tiles.pop(self.indoor_tiles.index(tile))
-        elif self.chosen_tile.type == "Outdoor":
+        elif self.get_current_tile().type == "Outdoor":
             tile = random.choice(self.indoor_tiles)
             tile.set_x(x)
             tile.set_y(y)
@@ -69,7 +72,7 @@ class Game:
     def move_player(self, x, y):
         self.player.set_y(y)
         self.player.set_x(x)
-        self.state = "Drawing Card"
+        self.state = "Moving"  # State should be drawing card
 
     def select_move(self, direction):
         x, y = self.get_destination_coords(direction)
@@ -114,14 +117,13 @@ class Game:
         if direction == d.SOUTH:
             if d.NORTH not in self.chosen_tile.doors:
                 return False
-        if direction == d.EAST:
-            if d.WEST not in self.chosen_tile.doors:
-                return False
         if direction == d.WEST:
             if d.EAST not in self.chosen_tile.doors:
                 return False
-        else:
-            return True
+        elif direction == d.EAST:
+            if d.WEST not in self.chosen_tile.doors:
+                return False
+        return True
 
     def place_tile(self, x, y):
         tile = self.chosen_tile
@@ -194,7 +196,7 @@ class DevCards:
 
 
 class Tile:
-    def __init__(self, name, x=16, y=16, effect=None, doors=None):
+    def __init__(self, name, x=16, y=16, effect=None, doors=None, entrance=None):
         if doors is None:
             doors = []
         self.name = name
@@ -202,6 +204,7 @@ class Tile:
         self.y = y  # y will represent the tiles position vertically
         self.effect = effect
         self.doors = doors
+        self.entrance = entrance
 
     def set_x(self, x):
         self.x = x
@@ -212,7 +215,22 @@ class Tile:
     def change_door_position(self, idx, direction):
         self.doors[idx] = direction
 
+    def set_entrance(self, direction):
+        self.entrance = direction
+
+    def rotate_entrance(self):
+        if self.entrance == d.NORTH:
+            self.set_entrance(d.EAST)
+        if self.entrance == d.SOUTH:
+            self.set_entrance(d.WEST)
+        if self.entrance == d.EAST:
+            self.set_entrance(d.SOUTH)
+        if self.entrance == d.WEST:
+            self.set_entrance(d.NORTH)
+
     def rotate_tile(self):  # Will rotate the tile 1 position clockwise
+        if self.name == "Dining Room" or self.name == "Patio":
+            self.rotate_entrance()
         for door in self.doors:
             if door == d.NORTH:
                 self.change_door_position(self.doors.index(door), d.EAST)
@@ -225,11 +243,11 @@ class Tile:
 
 
 class IndoorTile(Tile):
-    def __init__(self, name, effect=None, doors=None, x=16, y=16):
+    def __init__(self, name, effect=None, doors=None, x=16, y=16, entrance=None):
         if doors is None:
             doors = []
         self.type = "Indoor"
-        super().__init__(name, x, y, effect, doors)
+        super().__init__(name, x, y, effect, doors, entrance)
 
     def __repr__(self):
         return f'{self.name}, {self.doors}, {self.type},' \
@@ -237,11 +255,11 @@ class IndoorTile(Tile):
 
 
 class OutdoorTile(Tile):
-    def __init__(self, name, effect=None, doors=None, x=16, y=16):
+    def __init__(self, name, effect=None, doors=None, x=16, y=16, entrance=None):
         if doors is None:
             doors = []
         self.type = "Outdoor"
-        super().__init__(name, x, y, effect, doors)
+        super().__init__(name, x, y, effect, doors, entrance)
 
     def __repr__(self):
         return f'{self.name}, {self.doors}, {self.type},' \
