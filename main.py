@@ -1,3 +1,4 @@
+from http.client import SWITCHING_PROTOCOLS
 import random
 from directions import Direction as d
 import pandas as pd
@@ -83,6 +84,7 @@ class Game:
             event_three = (card[1][5], card[1][6])
             dev_card = DevCard(item, event_one, event_two, event_three)
             self.dev_cards.append(dev_card)
+        random.shuffle(self.dev_cards)
 
     def move_player(self, x, y):
         self.player.set_y(y)
@@ -156,6 +158,26 @@ class Game:
         tile = self.chosen_tile
         tile.rotate_tile()
 
+    def trigger_dev_card(self, time):
+        dev_card = self.dev_cards[0]
+        self.dev_cards.pop(0)
+        event = dev_card.get_event_at_time(time)
+        if event[0] == "Nothing":
+            return
+        elif event[0] == "Health":
+            self.player.add_health(event[1])
+        elif event[0] == "Item":
+            next_card = self.dev_cards[0]
+            self.dev_cards.pop(0)
+            self.player.add_item(next_card.get_item())
+        elif event[0] == "Zombies":
+            self.trigger_attack(event[1])
+    
+    def trigger_attack(self, zombies):
+        player_attack = self.player.get_attack()
+        damage = zombies - player_attack
+        self.player.add_health(-damage)
+
     def draw_dev_card(self):
         pass
 
@@ -192,6 +214,15 @@ class Player:
 
     def set_health(self, health):
         self.health = health
+    
+    def add_health(self, health):
+        self.health += health
+
+    def get_items(self):
+        return self.items
+    
+    def add_item(self, item):
+        self.items.append(item)
 
     def set_x(self, x):
         self.x = x
@@ -222,6 +253,9 @@ class DevCard:
         elif time == 11:
             return self.event_three
     
+    def get_item(self):
+        return self.item
+
     def __str__(self):
         return "Item: {}, Event 1: {}, Event 2: {}, Event 3: {}".format(self.item, self.event_one, self.event_two, self.event_three)
 
