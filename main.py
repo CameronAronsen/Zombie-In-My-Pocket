@@ -6,17 +6,20 @@ import cmd
 
 class Game:
     def __init__(self, player, time=9, game_map=None, indoor_tiles=None, outdoor_tiles=None, chosen_tile=None,
-                 state="Starting", current_move_direction=None):
+                 dev_cards=None, state="Starting", current_move_direction=None):
         if indoor_tiles is None:
             indoor_tiles = []  # Will contain a list of all available indoor tiles
         if outdoor_tiles is None:
             outdoor_tiles = []  # Will contain a list of all available outdoor tiles
+        if dev_cards is None:
+            dev_cards = []  # Will contain a list of all available development cards
         if game_map is None:
             game_map = {}  # Tiles dictionary will have the x and y co-ords as the key and the Tile object as the value
         self.player = player
         self.time = time
-        self.indoor_tiles = indoor_tiles  
+        self.indoor_tiles = indoor_tiles
         self.outdoor_tiles = outdoor_tiles
+        self.dev_cards = dev_cards
         self.tiles = game_map
         self.chosen_tile = chosen_tile
         self.state = state
@@ -37,6 +40,7 @@ class Game:
                      f' the chosen tile is {self.chosen_tile.name}, {self.chosen_tile.doors}'
                      f' the state is {self.state} ENTRANCE {self.chosen_tile.entrance}')
 
+    # Loads tiles from excel file
     def load_tiles(self):  # Needs Error handling in this method
         excel_data = pd.read_excel('Tiles.xlsx')
         tiles = []
@@ -68,6 +72,17 @@ class Game:
             tile.set_y(y)
             self.chosen_tile = tile
             self.outdoor_tiles.pop(self.outdoor_tiles.index(tile))
+
+    # Loads development cards from excel file
+    def load_dev_cards(self):
+        card_data = pd.read_excel('DevCards.xlsx')
+        for card in card_data.iterrows():
+            item = card[1][0]
+            event_one = (card[1][1], card[1][2])
+            event_two = (card[1][3], card[1][4])
+            event_three = (card[1][5], card[1][6])
+            dev_card = DevCard(item, event_one, event_two, event_three)
+            self.dev_cards.append(dev_card)
 
     def move_player(self, x, y):
         self.player.set_y(y)
@@ -164,6 +179,7 @@ class Player:
         self.health = health
         self.x = x  # x Will represent the players position horizontally starts at 16
         self.y = y  # y will represent the players position vertically starts at 16
+        self.items = []  # Holds the players items. Can hold 2 items at a time
 
     def get_health(self):
         return self.health
@@ -190,9 +206,24 @@ class Player:
         return self.y
 
 
-class DevCards:
-    def __init__(self):
-        pass
+# Development cards for the game. Played when the player moves into the room.
+class DevCard:
+    def __init__(self, item, event_one, event_two, event_three):
+        self.item = item
+        self.event_one = event_one
+        self.event_two = event_two
+        self.event_three = event_three
+
+    def get_event_at_time(self, time):
+        if time == 9:
+            return self.event_one
+        elif time == 10:
+            return self.event_two
+        elif time == 11:
+            return self.event_three
+    
+    def __str__(self):
+        return "Item: {}, Event 1: {}, Event 2: {}, Event 3: {}".format(self.item, self.event_one, self.event_two, self.event_three)
 
 
 class Tile:
