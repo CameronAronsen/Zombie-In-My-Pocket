@@ -28,7 +28,6 @@ class Game:
             if tile.name == 'Foyer':  # Game always starts in the Foyer at 16,16
                 self.chosen_tile = tile
                 self.state = "Rotating"
-                self.indoor_tiles.pop(self.indoor_tiles.index(tile))
                 break
 
     def get_game(self):
@@ -57,17 +56,23 @@ class Game:
 
     def draw_tile(self, x, y):
         if self.get_current_tile().type == "Indoor":
-            tile = random.choice(self.indoor_tiles)  # Chooses a random indoor tile and places it
-            tile.set_x(x)
-            tile.set_y(y)
-            self.chosen_tile = tile
-            self.indoor_tiles.pop(self.indoor_tiles.index(tile))
+            if self.get_current_tile().name == "Dining Room" \
+                    and self.current_move_direction == self.get_current_tile().entrance:
+                t = [t for t in self.outdoor_tiles if t.name == "Patio"]
+                tile = t[0]
+                tile.set_x(x)
+                tile.set_y(y)
+                self.chosen_tile = tile
+            else:
+                tile = random.choice(self.indoor_tiles)  # Chooses a random indoor tile and places it
+                tile.set_x(x)
+                tile.set_y(y)
+                self.chosen_tile = tile
         elif self.get_current_tile().type == "Outdoor":
-            tile = random.choice(self.indoor_tiles)
+            tile = random.choice(self.outdoor_tiles)
             tile.set_x(x)
             tile.set_y(y)
             self.chosen_tile = tile
-            self.outdoor_tiles.pop(self.outdoor_tiles.index(tile))
 
     def move_player(self, x, y):
         self.player.set_y(y)
@@ -77,12 +82,11 @@ class Game:
     def select_move(self, direction):
         x, y = self.get_destination_coords(direction)
         if self.check_for_door(direction):  # If there's a door where the player tried to move
+            self.current_move_direction = direction
             if self.check_for_room(x, y) is False:
                 self.draw_tile(x, y)
-                self.current_move_direction = direction
                 self.state = "Rotating"
             if self.check_for_room(x, y):
-                self.current_move_direction = direction
                 self.move_player(x, y)
 
     def get_destination_coords(self, direction):  # Gets the x and y value of the proposed move
@@ -125,13 +129,28 @@ class Game:
                 return False
         return True
 
+    def check_entrances_align(self, direction):
+        if self.get_current_tile().entrance == d.NORTH:
+            if direction == d.SOUTH:
+                return True
+        if self.get_current_tile().entrance == d.SOUTH:
+            if direction == d.NORTH:
+                return True
+        if self.get_current_tile().entrance == d.WEST:
+            if direction == d.EAST:
+                return True
+        if self.get_current_tile().entrance == d.EAST:
+            if direction == d.WEST:
+                return True
+        return False
+
     def place_tile(self, x, y):
         tile = self.chosen_tile
         self.tiles[(x, y)] = tile
         self.state = "Moving"
         if tile.type == "Outdoor":
             self.outdoor_tiles.pop(self.outdoor_tiles.index(tile))
-        elif tile.type == "indoor":
+        elif tile.type == "Indoor":
             self.indoor_tiles.pop(self.indoor_tiles.index(tile))
 
     def get_current_tile(self):  # returns the current tile that the player is at
@@ -288,6 +307,11 @@ class Commands(cmd.Cmd):
                 self.game.place_tile(16, 16)
                 self.game.get_game()
             else:
+                if self.game.get_current_tile().name == "Dining Room":
+                    if self.game.check_entrances_align(self.game.current_move_direction):
+                        self.game.place_tile(self.game.chosen_tile.x, self.game.chosen_tile.y)
+                        self.game.move_player(self.game.chosen_tile.x, self.game.chosen_tile.y)
+                        self.game.get_game()
                 if self.game.check_doors_align(self.game.current_move_direction):
                     self.game.place_tile(self.game.chosen_tile.x, self.game.chosen_tile.y)
                     self.game.move_player(self.game.chosen_tile.x, self.game.chosen_tile.y)
