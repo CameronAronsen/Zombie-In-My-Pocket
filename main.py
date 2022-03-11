@@ -171,12 +171,50 @@ class Game:
             self.dev_cards.pop(0)
             self.player.add_item(next_card.get_item())
         elif event[0] == "Zombies":
-            self.trigger_attack(event[1])
+            self.state = "Attacking"
     
-    def trigger_attack(self, zombies):
+    def trigger_attack(self, zombies, *item):
         player_attack = self.player.get_attack()
+        
+        if len(item) == 2:
+            if "Oil" in item and "Candle" in item:
+                self.player.remove_item("Oil")
+                self.state = "Moving"
+                return
+            elif "Gasoline" in item and "Candle" in item:
+                self.player.remove_item("Gasoline")
+                self.state = "Moving"
+                return
+            elif "Gasoline" in item and "Chainsaw" in item:
+                #Add uses to chainsaw
+                self.player.remove_item("Gasoline")
+        elif len(item) == 1:
+            if item == "Machete":
+                player_attack += 2
+            elif item == "Chainsaw":
+                player_attack += 3
+            elif item == "Golf Club" or item == "Grisly Femur" or item == "Board With Nails":
+                player_attack += 1
+            elif item == "Can of Soda":
+                player.add_health(2)
+            elif item == "Oil":
+                # Run away to another room. Like Trigger Run, no health lost
+                return
+
         damage = zombies - player_attack
         self.player.add_health(-damage)
+
+        self.state = "Moving"
+
+    # DO MOVEMENT INTO ROOM
+    def trigger_run(self):
+        self.state = "Moving"
+        self.player.add_health(-1)
+    
+    def trigger_cower(self):
+        self.state = "Moving"
+        self.player.add_health(3)
+        self.dev_cards.pop(0)
 
     def draw_dev_card(self):
         pass
@@ -222,7 +260,11 @@ class Player:
         return self.items
     
     def add_item(self, item):
-        self.items.append(item)
+        if len(self.items) < 2:
+            self.items.append(item)
+    
+    def remove_item(self, item):
+        self.items.pop(self.items.index(item))
 
     def set_x(self, x):
         self.x = x
@@ -386,4 +428,8 @@ class Commands(cmd.Cmd):
 
 
 if __name__ == "__main__":
-    Commands().cmdloop()
+    player = Player()
+    game = Game(player)
+    game.load_dev_cards()
+    game.trigger_attack(3, "Candle", "Oil")
+    # Commands().cmdloop()
