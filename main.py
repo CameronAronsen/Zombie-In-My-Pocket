@@ -190,13 +190,13 @@ class Game:
                 self.player.remove_item("Gasoline")
         elif len(item) == 1:
             if item == "Machete":
-                player_attack += 2
+                self.player.add_attack(2)
             elif item == "Chainsaw":
-                player_attack += 3
+                self.player.add_attack(3)
             elif item == "Golf Club" or item == "Grisly Femur" or item == "Board With Nails":
-                player_attack += 1
+                self.player.add_attack(1)
             elif item == "Can of Soda":
-                player.add_health(2)
+                self.player.add_health(2)
             elif item == "Oil":
                 # Run away to another room. Like Trigger Run, no health lost
                 return
@@ -255,6 +255,9 @@ class Player:
     
     def add_health(self, health):
         self.health += health
+
+    def add_attack(self, attack):
+        self.attack += attack
 
     def get_items(self):
         return self.items
@@ -428,8 +431,4 @@ class Commands(cmd.Cmd):
 
 
 if __name__ == "__main__":
-    player = Player()
-    game = Game(player)
-    game.load_dev_cards()
-    game.trigger_attack(3, "Candle", "Oil")
-    # Commands().cmdloop()
+    Commands().cmdloop()
