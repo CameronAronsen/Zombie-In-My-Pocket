@@ -15,7 +15,7 @@ class Game:
             game_map = {}  # Tiles dictionary will have the x and y co-ords as the key and the Tile object as the value
         self.player = player
         self.time = time
-        self.indoor_tiles = indoor_tiles
+        self.indoor_tiles = indoor_tiles  
         self.outdoor_tiles = outdoor_tiles
         self.tiles = game_map
         self.chosen_tile = chosen_tile
