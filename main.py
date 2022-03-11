@@ -1,4 +1,3 @@
-from http.client import SWITCHING_PROTOCOLS
 import random
 from directions import Direction as d
 import pandas as pd
