@@ -56,6 +56,8 @@ class Game:
 
     def draw_tile(self, x, y):
         if self.get_current_tile().type == "Indoor":
+            if len(self.indoor_tiles) == 0:
+                return print("No more indoor tiles")
             if self.get_current_tile().name == "Dining Room" \
                     and self.current_move_direction == self.get_current_tile().entrance:
                 t = [t for t in self.outdoor_tiles if t.name == "Patio"]
@@ -69,6 +71,8 @@ class Game:
                 tile.set_y(y)
                 self.chosen_tile = tile
         elif self.get_current_tile().type == "Outdoor":
+            if len(self.outdoor_tiles) == 0:
+                return print("No more outdoor tiles")
             tile = random.choice(self.outdoor_tiles)
             tile.set_x(x)
             tile.set_y(y)
@@ -129,20 +133,20 @@ class Game:
                 return False
         return True
 
-    def check_entrances_align(self, direction):
+    def check_entrances_align(self):
         if self.get_current_tile().entrance == d.NORTH:
-            if direction == d.SOUTH:
+            if self.chosen_tile.entrance == d.SOUTH:
                 return True
         if self.get_current_tile().entrance == d.SOUTH:
-            if direction == d.NORTH:
+            if self.chosen_tile.entrance == d.NORTH:
                 return True
         if self.get_current_tile().entrance == d.WEST:
-            if direction == d.EAST:
+            if self.chosen_tile.entrance == d.EAST:
                 return True
         if self.get_current_tile().entrance == d.EAST:
-            if direction == d.WEST:
+            if self.chosen_tile.entrance == d.WEST:
                 return True
-        return False
+        return print("Entrances Dont Align")
 
     def place_tile(self, x, y):
         tile = self.chosen_tile
@@ -159,6 +163,10 @@ class Game:
     def rotate(self):
         tile = self.chosen_tile
         tile.rotate_tile()
+        if tile.name == "Foyer":
+            return
+        if self.get_current_tile().name == "Dining Room" or "Patio":
+            tile.rotate_entrance()
 
     def draw_dev_card(self):
         pass
@@ -248,8 +256,6 @@ class Tile:
             self.set_entrance(d.NORTH)
 
     def rotate_tile(self):  # Will rotate the tile 1 position clockwise
-        if self.name == "Dining Room" or self.name == "Patio":
-            self.rotate_entrance()
         for door in self.doors:
             if door == d.NORTH:
                 self.change_door_position(self.doors.index(door), d.EAST)
@@ -307,12 +313,13 @@ class Commands(cmd.Cmd):
                 self.game.place_tile(16, 16)
                 self.game.get_game()
             else:
-                if self.game.get_current_tile().name == "Dining Room":
-                    if self.game.check_entrances_align(self.game.current_move_direction):
+                if self.game.get_current_tile().name == "Dining Room" \
+                        and self.game.current_move_direction == self.game.get_current_tile().entrance:
+                    if self.game.check_entrances_align():
                         self.game.place_tile(self.game.chosen_tile.x, self.game.chosen_tile.y)
                         self.game.move_player(self.game.chosen_tile.x, self.game.chosen_tile.y)
                         self.game.get_game()
-                if self.game.check_doors_align(self.game.current_move_direction):
+                elif self.game.check_doors_align(self.game.current_move_direction):
                     self.game.place_tile(self.game.chosen_tile.x, self.game.chosen_tile.y)
                     self.game.move_player(self.game.chosen_tile.x, self.game.chosen_tile.y)
                     self.game.get_game()
