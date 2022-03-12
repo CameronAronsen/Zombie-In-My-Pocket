@@ -158,6 +158,20 @@ class Game:
                 return True
         return print("Entrances Dont Align")
 
+    def check_dining_room_has_exit(self):
+        tile = self.chosen_tile
+        if tile.name == "Dining Room":
+            if self.current_move_direction == d.NORTH and tile.entrance == d.SOUTH:
+                return False
+            if self.current_move_direction == d.SOUTH and tile.entrance == d.NORTH:
+                return False
+            if self.current_move_direction == d.EAST and tile.entrance == d.WEST:
+                return False
+            if self.current_move_direction == d.WEST and tile.entrance == d.EAST:
+                return False
+        else:
+            return True
+
     def place_tile(self, x, y):
         tile = self.chosen_tile
         self.tiles[(x, y)] = tile
@@ -258,12 +272,16 @@ class Tile:
     def rotate_entrance(self):
         if self.entrance == d.NORTH:
             self.set_entrance(d.EAST)
+            return
         if self.entrance == d.SOUTH:
             self.set_entrance(d.WEST)
+            return
         if self.entrance == d.EAST:
             self.set_entrance(d.SOUTH)
+            return
         if self.entrance == d.WEST:
             self.set_entrance(d.NORTH)
+            return
 
     def rotate_tile(self):  # Will rotate the tile 1 position clockwise
         for door in self.doors:
@@ -302,10 +320,16 @@ class OutdoorTile(Tile):
 
 
 class Commands(cmd.Cmd):
-    player = Player()
-    game = Game(player)
+    intro = 'Welcome, type help or ? to list the commands '
+
+    def __init__(self):
+        cmd.Cmd.__init__(self)
+        self.prompt = "> "
+        player = Player()
+        self.game = Game(player)
 
     def do_start(self, line):
+        """Starts a new game"""
         if self.game.state == "Starting":
             self.game.start_game()
             self.game.get_game()
@@ -313,15 +337,21 @@ class Commands(cmd.Cmd):
             print("Game has already Started")
 
     def do_rotate(self, line):
+        """Rotates the current map piece 1 rotation clockwise"""
         if self.game.state == "Rotating":
             self.game.rotate()
             self.game.get_game()
+        else:
+            print("Tile not chosen to rotate")
 
     def do_place(self, line):
+        """Places the current map tile"""
         if self.game.state == "Rotating":
             if self.game.chosen_tile.name == "Foyer":
                 self.game.place_tile(16, 16)
                 self.game.get_game()
+            elif self.game.check_dining_room_has_exit() is False:
+                return print("Dining room entrance must face an empty tile")
             else:
                 if self.game.get_current_tile().name == "Dining Room" \
                         and self.game.current_move_direction == self.game.get_current_tile().entrance:
@@ -335,26 +365,40 @@ class Commands(cmd.Cmd):
                     self.game.get_game()
                 else:
                     print("Doors Dont Align")
+        else:
+            print("Tile not chosen to place")
 
     def do_n(self, line):
+        """Moves the player North"""
         if self.game.state == "Moving":
             self.game.select_move(d.NORTH)
             self.game.get_game()
+        else:
+            print("Player not ready to move")
 
     def do_s(self, line):
+        """Moves the player South"""
         if self.game.state == "Moving":
             self.game.select_move(d.SOUTH)
             self.game.get_game()
+        else:
+            print("Player not ready to move")
 
     def do_e(self, line):
+        """Moves the player East"""
         if self.game.state == "Moving":
             self.game.select_move(d.EAST)
             self.game.get_game()
+        else:
+            print("Player not ready to move")
 
     def do_w(self, line):
+        """Moves the player West"""
         if self.game.state == "Moving":
             self.game.select_move(d.WEST)
             self.game.get_game()
+        else:
+            print("Player not ready to move")
 
     def do_draw(self):
         if self.game.state == "Drawing Card":
