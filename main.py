@@ -83,6 +83,9 @@ class Game:
         self.player.set_x(x)
         self.state = "Moving"  # State should be drawing card
 
+    def get_tile_at(self, x, y):
+        return self.tiles[(x, y)]
+
     def select_move(self, direction):
         x, y = self.get_destination_coords(direction)
         if self.check_for_door(direction):  # If there's a door where the player tried to move
@@ -91,7 +94,14 @@ class Game:
                 self.draw_tile(x, y)
                 self.state = "Rotating"
             if self.check_for_room(x, y):
-                self.move_player(x, y)
+                if self.check_indoor_outdoor_move(self.get_current_tile().type, self.get_tile_at(x, y).type):
+                    return print("Cannot Move this way")
+                else:
+                    self.move_player(x, y)
+
+    def check_indoor_outdoor_move(self, current_type, move_type):
+        if current_type != move_type and self.get_current_tile().name != "Patio" or "Dining Room":
+            return False
 
     def get_destination_coords(self, direction):  # Gets the x and y value of the proposed move
         if direction == d.NORTH:
