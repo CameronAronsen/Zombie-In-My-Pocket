@@ -6,21 +6,25 @@ import cmd
 
 class Game:
     def __init__(self, player, time=9, game_map=None, indoor_tiles=None, outdoor_tiles=None, chosen_tile=None,
-                 state="Starting", current_move_direction=None):
+                 dev_cards=None, state="Starting", current_move_direction=None):
         if indoor_tiles is None:
             indoor_tiles = []  # Will contain a list of all available indoor tiles
         if outdoor_tiles is None:
             outdoor_tiles = []  # Will contain a list of all available outdoor tiles
+        if dev_cards is None:
+            dev_cards = []  # Will contain a list of all available development cards
         if game_map is None:
             game_map = {}  # Tiles dictionary will have the x and y co-ords as the key and the Tile object as the value
         self.player = player
         self.time = time
         self.indoor_tiles = indoor_tiles
         self.outdoor_tiles = outdoor_tiles
+        self.dev_cards = dev_cards
         self.tiles = game_map
         self.chosen_tile = chosen_tile
         self.state = state
         self.current_move_direction = current_move_direction
+        self.current_zombies = 0
 
     def start_game(self):
         self.load_tiles()
@@ -36,6 +40,7 @@ class Game:
                      f' the chosen tile is {self.chosen_tile.name}, {self.chosen_tile.doors}'
                      f' the state is {self.state} ENTRANCE {self.chosen_tile.entrance}')
 
+    # Loads tiles from excel file
     def load_tiles(self):  # Needs Error handling in this method
         excel_data = pd.read_excel('Tiles.xlsx')
         tiles = []
@@ -77,6 +82,18 @@ class Game:
             tile.set_x(x)
             tile.set_y(y)
             self.chosen_tile = tile
+
+    # Loads development cards from excel file
+    def load_dev_cards(self):
+        card_data = pd.read_excel('DevCards.xlsx')
+        for card in card_data.iterrows():
+            item = card[1][0]
+            event_one = (card[1][1], card[1][2])
+            event_two = (card[1][3], card[1][4])
+            event_three = (card[1][5], card[1][6])
+            dev_card = DevCard(item, event_one, event_two, event_three)
+            self.dev_cards.append(dev_card)
+        random.shuffle(self.dev_cards)
 
     def move_player(self, x, y):
         self.player.set_y(y)
@@ -192,8 +209,92 @@ class Game:
         if self.get_current_tile().name == "Dining Room" or "Patio":
             tile.rotate_entrance()
 
-    def draw_dev_card(self):
-        pass
+    # Call when player enters a room and draws a dev card
+    def trigger_dev_card(self, time):
+        dev_card = self.dev_cards[0]
+        self.dev_cards.pop(0)
+        event = dev_card.get_event_at_time(time)  # Gets the event at the current time
+        if event[0] == "Nothing":
+            print("There is nothing in this room")
+            return
+        elif event[0] == "Health":  # Change health of player
+            print("There might be something in this room")
+            self.player.add_health(event[1])
+            if event[1] > 0:
+                print(f"You gained {event[1]} health")
+            elif event[1] < 0:
+                print(f"You lost {event[1]} health")
+            elif event[1] == 0:
+                print("You didn't gain or lose any health")
+        elif event[0] == "Item":  # Add item to player's inventory if there is room
+            next_card = self.dev_cards[0]
+            print(f"There is an item in this room: {next_card.get_item()}")
+            if len(self.player.get_items()) < 2:
+                self.dev_cards.pop(0)
+                self.player.add_item(next_card.get_item())
+                print(f"You picked up the {next_card.get_item()}")
+            else:
+                print("You already have two items, do you want to drop one of them?")
+                self.state = "Dropping Item"  # Create CMD for dropping item
+        elif event[0] == "Zombies":  # Add zombies to the game, begin combat
+            print(f"There are {event[1]} zombies in this room, prepare to fight!")
+            self.current_zombies = int(event[1])
+            self.state = "Attacking"  # Create CMD for attacking zombies
+    
+    # Call in CMD if state is attacking, *items is a list of items the player is going to use
+    def trigger_attack(self, *item):
+        player_attack = self.player.get_attack()
+        zombies = self.current_zombies
+        
+        if len(item) == 2:  # If the player is using two items
+            if "Oil" in item and "Candle" in item:
+                print("You used the oil and the candle to attack the zombies, it kills all of them")
+                self.player.remove_item("Oil")
+                return
+            elif "Gasoline" in item and "Candle" in item:
+                print("You used the gasoline and the candle to attack the zombies, it kills all of them")
+                self.player.remove_item("Gasoline")
+                return
+            elif "Gasoline" in item and "Chainsaw" in item:
+                #Add uses to chainsaw
+                self.player.remove_item("Gasoline")
+        elif len(item) == 1:
+            if item == "Machete":
+                self.player.add_attack(2)
+            elif item == "Chainsaw":
+                self.player.add_attack(3)
+            elif item == "Golf Club" or item == "Grisly Femur" or item == "Board With Nails":
+                self.player.add_attack(1)
+            elif item == "Can of Soda":
+                self.player.add_health(2)
+            elif item == "Oil":
+                self.trigger_run(0)
+                return
+
+        # Calculate damage on the player
+        damage = zombies - player_attack
+        print(f"You attacked the zombies, you lost {damage} health")
+        self.player.add_health(-damage)
+        self.current_zombies = 0
+        self.state = "Moving"
+
+    # DO MOVEMENT INTO ROOM, Call if state is attacking and player wants to run away
+    def trigger_run(self, health_lost = -1):
+        self.state = "Moving"
+        self.player.add_health(health_lost)
+        print(f"You run away from the zombies, and lose {health_lost} health")
+    
+    # If player chooses to cower in stead of move to a new room
+    def trigger_cower(self):
+        self.player.add_health(3)
+        self.dev_cards.pop(0)
+        print("You cower in fear, gaining 3 health, but lose time with the dev card")
+
+    # Call when player wants to drop an item, and state is dropping item
+    def drop_item(self, old_item, new_item):
+        self.player.remove_item(old_item)
+        self.player.add_item(new_item)
+        print(f"You dropped the {old_item} and picked up the {new_item}")
 
     @staticmethod
     def resolve_doors(n, e, s, w):
@@ -215,6 +316,7 @@ class Player:
         self.health = health
         self.x = x  # x Will represent the players position horizontally starts at 16
         self.y = y  # y will represent the players position vertically starts at 16
+        self.items = []  # Holds the players items. Can hold 2 items at a time
 
     def get_health(self):
         return self.health
@@ -227,6 +329,22 @@ class Player:
 
     def set_health(self, health):
         self.health = health
+    
+    def add_health(self, health):
+        self.health += health
+
+    def add_attack(self, attack):
+        self.attack += attack
+
+    def get_items(self):
+        return self.items
+    
+    def add_item(self, item):
+        if len(self.items) < 2:
+            self.items.append(item)
+    
+    def remove_item(self, item):
+        self.items.pop(self.items.index(item))
 
     def set_x(self, x):
         self.x = x
@@ -241,9 +359,27 @@ class Player:
         return self.y
 
 
-class DevCards:
-    def __init__(self):
-        pass
+# Development cards for the game. Played when the player moves into the room.
+class DevCard:
+    def __init__(self, item, event_one, event_two, event_three):
+        self.item = item
+        self.event_one = event_one
+        self.event_two = event_two
+        self.event_three = event_three
+
+    def get_event_at_time(self, time):
+        if time == 9:
+            return self.event_one
+        elif time == 10:
+            return self.event_two
+        elif time == 11:
+            return self.event_three
+    
+    def get_item(self):
+        return self.item
+
+    def __str__(self):
+        return "Item: {}, Event 1: {}, Event 2: {}, Event 3: {}".format(self.item, self.event_one, self.event_two, self.event_three)
 
 
 class Tile:
