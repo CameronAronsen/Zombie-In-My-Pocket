@@ -28,6 +28,7 @@ class Game:
 
     def start_game(self):
         self.load_tiles()
+        self.load_dev_cards()
         for tile in self.indoor_tiles:
             if tile.name == 'Foyer':  # Game always starts in the Foyer at 16,16
                 self.chosen_tile = tile
@@ -39,6 +40,9 @@ class Game:
         return print(f'the player is at {self.player.get_x(), self.player.get_y()}'
                      f' the chosen tile is {self.chosen_tile.name}, {self.chosen_tile.doors}'
                      f' the state is {self.state} ENTRANCE {self.chosen_tile.entrance}')
+
+    def get_time(self):
+        return self.time
 
     # Loads tiles from excel file
     def load_tiles(self):  # Needs Error handling in this method
@@ -212,8 +216,15 @@ class Game:
     # Call when player enters a room and draws a dev card
     def trigger_dev_card(self, time):
         if len(self.dev_cards) == 0:
-            self.lose_game()
-            return
+            if self.get_time == 11:
+                print("You have run out of time")
+                self.lose_game()
+                return
+            else:
+                print("Reshuffling The Deck")
+                self.load_dev_cards()
+                self.time += 1
+                
         dev_card = self.dev_cards[0]
         self.dev_cards.pop(0)
         event = dev_card.get_event_at_time(time)  # Gets the event at the current time
@@ -320,6 +331,7 @@ class Game:
         return doors
 
     def lose_game(self):
+        self.state = "Game Over"
         print("You lose")
 
 
@@ -564,10 +576,48 @@ class Commands(cmd.Cmd):
         self.player = Player()
         self.game = Game(self.player)
 
-    def do_draw(self):
+    # Dont know if we need this. Surely we can do this automatically after a move
+    def do_draw(self, line):
         """Draws a new development card (Must be done after evey move)"""
-        if self.game.state == "Drawing Card":
-            self.game.draw_dev_card
+        self.game.trigger_dev_card(self.game.get_time())
+
+    # Not finished yet, Not Tested
+    def do_attack(self, items):
+        """Player attacks the zombies"""
+        if self.game.state == "Attacking":
+            self.game.trigger_attack(items)
+            self.game.get_game()
+        else:
+            print("You cannot attack right now")
+    
+    def do_run(self,line):
+        """The player runs away to the previous room"""
+        if self.game.state == "Attacking":
+            self.game.trigger_run()
+            self.game.get_game()
+        else:
+            print("You cannot run right now")
+    
+    def do_cower(self, line):
+        """The player cowers in fear"""
+        if self.game.state == "Attacking":
+            self.game.trigger_cower()
+            self.game.get_game()
+        else:
+            print("You cannot cower right now")
+
+    # Not finished yet, needs testing for spelling
+    def do_drop(self, item):
+        """Drops a card from your hand"""
+        if self.game.state == "Dropping Item":
+            self.game.trigger_drop(item)
+            self.game.get_game()
+        else:
+            print("You cannot drop a card right now")
+
+    def do_exit(self, line):
+        """Exits the game"""
+        return True
 
 
 if __name__ == "__main__":
