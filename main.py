@@ -211,6 +211,9 @@ class Game:
 
     # Call when player enters a room and draws a dev card
     def trigger_dev_card(self, time):
+        if len(self.dev_cards) == 0:
+            self.lose_game()
+            return
         dev_card = self.dev_cards[0]
         self.dev_cards.pop(0)
         event = dev_card.get_event_at_time(time)  # Gets the event at the current time
@@ -224,6 +227,9 @@ class Game:
                 print(f"You gained {event[1]} health")
             elif event[1] < 0:
                 print(f"You lost {event[1]} health")
+                if self.player.get_health() <= 0:
+                    self.lose_game()
+                    return
             elif event[1] == 0:
                 print("You didn't gain or lose any health")
         elif event[0] == "Item":  # Add item to player's inventory if there is room
@@ -275,8 +281,12 @@ class Game:
         damage = zombies - player_attack
         print(f"You attacked the zombies, you lost {damage} health")
         self.player.add_health(-damage)
-        self.current_zombies = 0
-        self.state = "Moving"
+        if self.player.get_health() <= 0:
+            self.lose_game()
+            return
+        else:
+            self.current_zombies = 0
+            self.state = "Moving"
 
     # DO MOVEMENT INTO ROOM, Call if state is attacking and player wants to run away
     def trigger_run(self, health_lost = -1):
@@ -308,6 +318,9 @@ class Game:
         if w == 1:
             doors.append(d.WEST)
         return doors
+
+    def lose_game(self):
+        print("You lose")
 
 
 class Player:
