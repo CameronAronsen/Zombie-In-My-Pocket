@@ -325,8 +325,8 @@ class Commands(cmd.Cmd):
     def __init__(self):
         cmd.Cmd.__init__(self)
         self.prompt = "> "
-        player = Player()
-        self.game = Game(player)
+        self.player = Player()
+        self.game = Game(self.player)
 
     def do_start(self, line):
         """Starts a new game"""
@@ -400,7 +400,23 @@ class Commands(cmd.Cmd):
         else:
             print("Player not ready to move")
 
+    def do_save(self, line):
+        """Takes a filepath and saves the game to a file"""
+        pass
+
+    def do_load(self, line):
+        """Takes a filepath and loads the game from a file"""
+        pass
+
+    def do_restart(self, line):
+        """Deletes your progress and ends the game"""
+        del self.game
+        del self.player
+        self.player = Player()
+        self.game = Game(self.player)
+
     def do_draw(self):
+        """Draws a new development card (Must be done after evey move)"""
         if self.game.state == "Drawing Card":
             self.game.draw_dev_card
 
