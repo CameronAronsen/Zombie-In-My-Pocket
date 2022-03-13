@@ -41,6 +41,12 @@ class Game:
                      f' the chosen tile is {self.chosen_tile.name}, {self.chosen_tile.doors}'
                      f' the state is {self.state} ENTRANCE {self.chosen_tile.entrance}')
 
+    def get_player_status(self):
+        return print(f'It is {self.get_time()} pm \n'
+                     f'The player currently has {self.player.get_health()} health \n'
+                     f'The player currently has {self.player.get_attack()} attack \n'
+                     f'The players items are {self.player.get_items()}')
+
     def get_time(self):
         return self.time
 
@@ -244,6 +250,15 @@ class Game:
             elif event[1] == 0:
                 print("You didn't gain or lose any health")
         elif event[0] == "Item":  # Add item to player's inventory if there is room
+            if len(self.dev_cards) == 0:
+                if self.get_time == 11:
+                    print("You have run out of time")
+                    self.lose_game()
+                    return
+                else:
+                    print("Reshuffling The Deck")
+                    self.load_dev_cards()
+                    self.time += 1
             next_card = self.dev_cards[0]
             print(f"There is an item in this room: {next_card.get_item()}")
             if len(self.player.get_items()) < 2:
@@ -257,7 +272,7 @@ class Game:
             print(f"There are {event[1]} zombies in this room, prepare to fight!")
             self.current_zombies = int(event[1])
             self.state = "Attacking"  # Create CMD for attacking zombies
-    
+
     # Call in CMD if state is attacking, *items is a list of items the player is going to use
     def trigger_attack(self, *item):
         player_attack = self.player.get_attack()
@@ -274,22 +289,25 @@ class Game:
                 return
             elif "Gasoline" in item and "Chainsaw" in item:
                 #Add uses to chainsaw
+                player_attack += 3
                 self.player.remove_item("Gasoline")
         elif len(item) == 1:
-            if item == "Machete":
-                self.player.add_attack(2)
-            elif item == "Chainsaw":
-                self.player.add_attack(3)
-            elif item == "Golf Club" or item == "Grisly Femur" or item == "Board With Nails":
-                self.player.add_attack(1)
-            elif item == "Can of Soda":
+            if "Machete" in item:
+                player_attack += 2
+            elif "Chainsaw" in item:
+                player_attack += 3
+            elif "Golf Club" in item or "Grisly Femur" in item or "Board With Nails" in item:
+                player_attack += 1
+            elif "Can of Soda" in item:
                 self.player.add_health(2)
-            elif item == "Oil":
+            elif "Oil" in item:
                 self.trigger_run(0)
                 return
 
         # Calculate damage on the player
         damage = zombies - player_attack
+        if damage < 0:
+            damage = 0
         print(f"You attacked the zombies, you lost {damage} health")
         self.player.add_health(-damage)
         if self.player.get_health() <= 0:
@@ -312,10 +330,9 @@ class Game:
         print("You cower in fear, gaining 3 health, but lose time with the dev card")
 
     # Call when player wants to drop an item, and state is dropping item
-    def drop_item(self, old_item, new_item):
+    def drop_item(self, old_item):
         self.player.remove_item(old_item)
-        self.player.add_item(new_item)
-        print(f"You dropped the {old_item} and picked up the {new_item}")
+        print(f"You dropped the {old_item}")
 
     @staticmethod
     def resolve_doors(n, e, s, w):
@@ -332,7 +349,6 @@ class Game:
 
     def lose_game(self):
         self.state = "Game Over"
-        print("You lose")
 
 
 class Player:
@@ -520,10 +536,12 @@ class Commands(cmd.Cmd):
                         self.game.place_tile(self.game.chosen_tile.x, self.game.chosen_tile.y)
                         self.game.move_player(self.game.chosen_tile.x, self.game.chosen_tile.y)
                         self.game.get_game()
+                        self.game.trigger_dev_card(self.game.get_time())
                 elif self.game.check_doors_align(self.game.current_move_direction):
                     self.game.place_tile(self.game.chosen_tile.x, self.game.chosen_tile.y)
                     self.game.move_player(self.game.chosen_tile.x, self.game.chosen_tile.y)
                     self.game.get_game()
+                    self.game.trigger_dev_card(self.game.get_time())
                 else:
                     print("Doors Dont Align")
         else:
@@ -581,12 +599,16 @@ class Commands(cmd.Cmd):
         """Draws a new development card (Must be done after evey move)"""
         self.game.trigger_dev_card(self.game.get_time())
 
-    # Not finished yet, Not Tested
-    def do_attack(self, items):
+
+    def do_attack(self, arg):
         """Player attacks the zombies"""
         if self.game.state == "Attacking":
-            self.game.trigger_attack(items)
-            self.game.get_game()
+            self.game.trigger_attack(arg)
+            if self.game.state == "Game Over":
+                print("You lose, game over, you have succumbed to the zombie horde")
+                print("To play again, type 'restart'")
+            else:
+                self.game.get_game()
         else:
             print("You cannot attack right now")
     
@@ -600,7 +622,7 @@ class Commands(cmd.Cmd):
     
     def do_cower(self, line):
         """The player cowers in fear"""
-        if self.game.state == "Attacking":
+        if self.game.state == "Moving":
             self.game.trigger_cower()
             self.game.get_game()
         else:
@@ -608,17 +630,19 @@ class Commands(cmd.Cmd):
 
     # Not finished yet, needs testing for spelling
     def do_drop(self, item):
-        """Drops a card from your hand"""
-        if self.game.state == "Dropping Item":
-            self.game.trigger_drop(item)
+        """Drops an item from your hand"""
+        if self.game.state != "Game Over":
+            self.game.drop_item(item)
             self.game.get_game()
-        else:
-            print("You cannot drop a card right now")
 
     def do_exit(self, line):
         """Exits the game"""
         return True
 
+    def do_status(self, line):
+        """Shows the status of the player"""
+        if self.game.state != "Game Over":
+            self.game.get_player_status()
 
 if __name__ == "__main__":
     Commands().cmdloop()
