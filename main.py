@@ -389,6 +389,19 @@ class Game:
                 return
         print("That item is not in your inventory")
 
+    def use_item(self, *item):
+        if "Can of Soda" in item:
+            self.player.add_health(2)
+            self.player.remove_item("Can of Soda")
+            print("Used Can of Soda, gained 2 health")
+        elif "Gasoline" in item and "Chainsaw" in item:
+            chainsaw_charge = self.player.get_item_charges("Chainsaw")
+            self.player.set_item_charges("Chainsaw", chainsaw_charge + 2)
+            self.player.remove_item("Gasoline")
+        else:
+            print("These items cannot be used right now")
+            return
+
     def choose_door(self, direction):
         if direction in self.chosen_tile.doors:
             print("Choose a NEW door not an existing one")
@@ -754,6 +767,13 @@ class Commands(cmd.Cmd):
                 self.game.get_game()
         else:
             print("You cannot attack right now")
+
+    def do_use(self, arg):
+        """Player uses item"""
+        if self.game.state == "Moving":
+            self.game.use_item(arg)
+        else:
+            print("You cannot do that right now")
 
     # Not finished yet, needs testing for spelling
     def do_drop(self, item):
