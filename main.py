@@ -810,14 +810,10 @@ class Commands(cmd.Cmd):
 
     def do_cower(self, line):
         """When attacked use this command to cower. You will take no damage but will advance the time"""
-        if self.game.state == "Attacking":
+        if self.game.state == "Moving":
             self.game.trigger_cower()
-            if len(self.game.chosen_tile.doors) == 1:
-                self.game.state = "Choosing Door"
-                self.game.get_game()
-                self.game.get_game()
         else:
-            print("Cannot cower while not being attacked")
+            print("Cannot cower while right now")
 
     def do_search(self, line):
         """Searches for the zombie totem. (Player must be in the evil temple and will have to resolve a dev card)"""
