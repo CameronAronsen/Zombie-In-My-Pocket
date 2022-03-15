@@ -764,10 +764,10 @@ class Commands(cmd.Cmd):
 
     def do_draw(self, line):
         """Draws a new development card (Must be done after evey move)"""
-        #if self.game.state == "Drawing Dev Card":
-        self.game.trigger_dev_card(self.game.time)
-        #else:
-        #    print("Cannot currently draw a card")
+        if self.game.state == "Drawing Dev Card":
+            self.game.trigger_dev_card(self.game.time)
+        else:
+            print("Cannot currently draw a card")
 
     def do_run(self, direction):
         """Given a direction will flee attacking zombies at a price of one health"""
