@@ -103,7 +103,8 @@ class Game:
             event_one = (card[1][1], card[1][2])
             event_two = (card[1][3], card[1][4])
             event_three = (card[1][5], card[1][6])
-            dev_card = DevCard(item, event_one, event_two, event_three)
+            charges = card[1][7]
+            dev_card = DevCard(item, charges, event_one, event_two, event_three)
             self.dev_cards.append(dev_card)
         random.shuffle(self.dev_cards)
         self.dev_cards.pop(0)
@@ -283,7 +284,7 @@ class Game:
             print(f"There is an item in this room: {next_card.get_item()}")
             if len(self.player.get_items()) < 2:
                 self.dev_cards.pop(0)
-                self.player.add_item(next_card.get_item())
+                self.player.add_item(next_card.get_item(), next_card.charges)
                 print(f"You picked up the {next_card.get_item()}")
                 if len(self.chosen_tile.doors) == 1:
                     self.state = "Choosing Door"
@@ -305,27 +306,43 @@ class Game:
             if "Oil" in item and "Candle" in item:
                 print("You used the oil and the candle to attack the zombies, it kills all of them")
                 self.player.remove_item("Oil")
+                self.state = "Moving"
                 return
             elif "Gasoline" in item and "Candle" in item:
                 print("You used the gasoline and the candle to attack the zombies, it kills all of them")
                 self.player.remove_item("Gasoline")
+                self.state = "Moving"
                 return
             elif "Gasoline" in item and "Chainsaw" in item:
-                # Add uses to chainsaw
+                chainsaw_charge = self.player.get_item_charges("Chainsaw")
+                self.player.set_item_charges("Chainsaw", chainsaw_charge + 2)
                 player_attack += 3
-                # Add uses to chainsaw
                 self.player.remove_item("Gasoline")
+                self.player.use_item_charge("Chainsaw")
+            else:
+                print("These items cannot be used together, try again")
+                return
         elif len(item) == 1:
             if "Machete" in item:
                 player_attack += 2
             elif "Chainsaw" in item:
-                player_attack += 3
+                if self.player.get_item_charges("Chainsaw") > 0:
+                    player_attack += 3
+                    self.player.use_item_charge("Chainsaw")
+                else:
+                    print("This item has no charges left")            
             elif "Golf Club" in item or "Grisly Femur" in item or "Board With Nails" in item:
                 player_attack += 1
             elif "Can of Soda" in item:
                 self.player.add_health(2)
+                self.player.remove_item("Can of Soda")
+                print("Used Can of Soda, gained 2 health")
+                return
             elif "Oil" in item:
                 self.trigger_run(0)
+                return
+            else:
+                print("You cannot use this item right now, try again")
                 return
 
         # Calculate damage on the player
@@ -365,8 +382,12 @@ class Game:
 
     # Call when player wants to drop an item, and state is dropping item
     def drop_item(self, old_item):
-        self.player.remove_item(old_item)
-        print(f"You dropped the {old_item}")
+        for item in self.player.get_items():
+            if item[0] == old_item:
+                self.player.remove_item(item)
+                print(f"You dropped the {old_item}")
+                return
+        print("That item is not in your inventory")
 
     def choose_door(self, direction):
         if direction in self.chosen_tile.doors:
@@ -451,9 +472,24 @@ class Player:
     def get_items(self):
         return self.items
 
-    def add_item(self, item):
+    def get_item_charges(self, item):
+        for check_item in self.player.get_items():
+            if check_item[0] == item:
+                return check_item[1]
+
+    def set_item_charges(self, item, charge):
+        for check_item in self.player.get_items():
+            if check_item[0] == item:
+                check_item[1] = charge
+    
+    def use_item_charge(self, item):
+        for check_item in self.player.get_items():
+            if check_item[0] == item:
+                check_item[1] -= 1
+
+    def add_item(self, item, charges):
         if len(self.items) < 2:
-            self.items.append(item)
+            self.items.append((item, charges))
 
     def remove_item(self, item):
         self.items.pop(self.items.index(item))
@@ -473,11 +509,15 @@ class Player:
 
 # Development cards for the game. Played when the player moves into the room.
 class DevCard:
-    def __init__(self, item, event_one, event_two, event_three):
+    def __init__(self, item, charges, event_one, event_two, event_three):
         self.item = item
+        self.charges = charges
         self.event_one = event_one
         self.event_two = event_two
         self.event_three = event_three
+
+        if self.charges != "Unlimited":
+            int(self.charges)
 
     def get_event_at_time(self, time):
         if time == 9:
@@ -489,6 +529,9 @@ class DevCard:
 
     def get_item(self):
         return self.item
+
+    def get_charges(self):
+        return self.charges
 
     def __str__(self):
         return "Item: {}, Event 1: {}, Event 2: {}, Event 3: {}".format(self.item, self.event_one, self.event_two,
@@ -721,10 +764,10 @@ class Commands(cmd.Cmd):
 
     def do_draw(self, line):
         """Draws a new development card (Must be done after evey move)"""
-        if self.game.state == "Drawing Dev Card":
-            self.game.trigger_dev_card(self.game.time)
-        else:
-            print("Cannot currently draw a card")
+        #if self.game.state == "Drawing Dev Card":
+        self.game.trigger_dev_card(self.game.time)
+        #else:
+        #    print("Cannot currently draw a card")
 
     def do_run(self, direction):
         """Given a direction will flee attacking zombies at a price of one health"""
