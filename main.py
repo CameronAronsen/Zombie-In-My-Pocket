@@ -58,7 +58,8 @@ class Game:
         return print(f'It is {self.get_time()} pm \n'
                      f'The player currently has {self.player.get_health()} health \n'
                      f'The player currently has {self.player.get_attack()} attack \n'
-                     f'The players items are {self.player.get_items()}')
+                     f'The players items are {self.player.get_items()}\n'
+                     f'The game state is {self.state}')
 
     def get_time(self):
         return self.time
@@ -274,6 +275,7 @@ class Game:
                 print(f"You gained {event[1]} health")
             elif event[1] < 0:
                 print(f"You lost {event[1]} health")
+                self.state = "Moving"
                 if self.player.get_health() <= 0:
                     self.lose_game()
                     return
@@ -281,6 +283,8 @@ class Game:
                 print("You didn't gain or lose any health")
             if len(self.chosen_tile.doors) == 1 and self.chosen_tile.name != "Foyer":
                 self.state = "Choosing Door"
+            if self.get_current_tile().name == "Garden" or "Kitchen":
+                self.trigger_room_effect(self.get_current_tile().name)
             else:
                 self.state = "Moving"
                 self.get_game()
@@ -309,6 +313,8 @@ class Game:
             else:
                 print("You already have two items, do you want to drop one of them?")
                 self.state = "Dropping Item"  # Create CMD for dropping item
+            if self.get_current_tile().name == "Garden" or "Kitchen":
+                self.trigger_room_effect(self.get_current_tile().name)
         elif event[0] == "Zombies":  # Add zombies to the game, begin combat
             print(f"There are {event[1]} zombies in this room, prepare to fight!")
             self.current_zombies = int(event[1])
@@ -373,6 +379,8 @@ class Game:
             return
         else:
             self.current_zombies = 0
+            if self.get_current_tile().name == "Garden" or "Kitchen":
+                self.trigger_room_effect(self.get_current_tile().name)
             self.state = "Moving"
 
     # DO MOVEMENT INTO ROOM, Call if state is attacking and player wants to run away
@@ -383,8 +391,18 @@ class Game:
             self.player.add_health(health_lost)
             print(f"You run away from the zombies, and lose {health_lost} health")
             self.can_cower = True
+            if self.get_current_tile().name == "Garden" or "Kitchen":
+                self.trigger_room_effect(self.get_current_tile().name)
         else:
             self.state = "Attacking"
+
+    def trigger_room_effect(self, room_name):
+        if room_name == "Garden":
+            self.player.add_health(1)
+            print(f"After ending your turn in the {room_name} you have gained one health")
+        if room_name == "Kitchen":
+            self.player.add_health(1)
+            print(f"After ending your turn in the {room_name} you have gained one health")
 
     # If player chooses to cower instead of move to a new room
     def trigger_cower(self):
@@ -402,6 +420,7 @@ class Game:
             if item[0] == old_item:
                 self.player.remove_item(item)
                 print(f"You dropped the {old_item}")
+                self.state = "Moving"
                 return
         print("That item is not in your inventory")
 
