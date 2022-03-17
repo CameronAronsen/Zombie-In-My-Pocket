@@ -273,6 +273,7 @@ class Game:
 
             if event[1] > 0:
                 print(f"You gained {event[1]} health")
+                self.state = "Moving"
             elif event[1] < 0:
                 print(f"You lost {event[1]} health")
                 self.state = "Moving"
@@ -327,19 +328,19 @@ class Game:
         if len(item) == 2:  # If the player is using two items
             if "Oil" in item and "Candle" in item:
                 print("You used the oil and the candle to attack the zombies, it kills all of them")
-                self.player.remove_item("Oil")
+                self.drop_item("Oil")
                 self.state = "Moving"
                 return
             elif "Gasoline" in item and "Candle" in item:
                 print("You used the gasoline and the candle to attack the zombies, it kills all of them")
-                self.player.remove_item("Gasoline")
+                self.drop_item("Gasoline")
                 self.state = "Moving"
                 return
             elif "Gasoline" in item and "Chainsaw" in item:
                 chainsaw_charge = self.player.get_item_charges("Chainsaw")
                 self.player.set_item_charges("Chainsaw", chainsaw_charge + 2)
                 player_attack += 3
-                self.player.remove_item("Gasoline")
+                self.drop_item("Gasoline")
                 self.player.use_item_charge("Chainsaw")
             else:
                 print("These items cannot be used together, try again")
@@ -357,7 +358,7 @@ class Game:
                 player_attack += 1
             elif "Can of Soda" in item:
                 self.player.add_health(2)
-                self.player.remove_item("Can of Soda")
+                self.drop_item("Can of Soda")
                 print("Used Can of Soda, gained 2 health")
                 return
             elif "Oil" in item:
@@ -400,9 +401,11 @@ class Game:
         if room_name == "Garden":
             self.player.add_health(1)
             print(f"After ending your turn in the {room_name} you have gained one health")
+            self.state ="Moving"
         if room_name == "Kitchen":
             self.player.add_health(1)
             print(f"After ending your turn in the {room_name} you have gained one health")
+            self.state ="Moving"
 
     # If player chooses to cower instead of move to a new room
     def trigger_cower(self):
@@ -427,12 +430,12 @@ class Game:
     def use_item(self, *item):
         if "Can of Soda" in item:
             self.player.add_health(2)
-            self.player.remove_item("Can of Soda")
+            self.drop_item("Can of Soda")
             print("Used Can of Soda, gained 2 health")
         elif "Gasoline" in item and "Chainsaw" in item:
             chainsaw_charge = self.player.get_item_charges("Chainsaw")
             self.player.set_item_charges("Chainsaw", chainsaw_charge + 2)
-            self.player.remove_item("Gasoline")
+            self.drop_item("Gasoline")
         else:
             print("These items cannot be used right now")
             return
@@ -542,7 +545,7 @@ class Player:
 
     def add_item(self, item, charges):
         if len(self.items) < 2:
-            self.items.append((item, charges))
+            self.items.append([item, charges])
 
     def remove_item(self, item):
         self.items.pop(self.items.index(item))
@@ -793,13 +796,23 @@ class Commands(cmd.Cmd):
         self.player = Player()
         self.game = Game(self.player)
 
-    def do_attack(self, arg):
+    def do_attack(self, line):
         """Player attacks the zombies"""
+        arg1 = ''
+        arg2 = 0
+        if "," in line:
+            arg1, arg2 = [item for item in line.split(", ")]
+        else:
+            arg1 = line
+
         if self.game.state == "Attacking":
-            if len(arg) == 0:
+            if arg1 == '':
                 self.game.trigger_attack()
-            else:
-                self.game.trigger_attack(arg)
+            elif arg2 == 0:
+                self.game.trigger_attack(arg1)
+            elif arg1 != '' and arg2 != 0:
+                self.game.trigger_attack(arg1, arg2)
+
             if len(self.game.chosen_tile.doors) == 1 and self.game.chosen_tile.name != "Foyer":
                 self.game.state = "Choosing Door"
                 self.game.get_game()
@@ -811,10 +824,22 @@ class Commands(cmd.Cmd):
         else:
             print("You cannot attack right now")
 
-    def do_use(self, arg):
+    def do_use(self, line):
         """Player uses item"""
+        arg1 = ''
+        arg2 = 0
+        if "," in line:
+            arg1, arg2 = [item for item in line.split(", ")]
+        else:
+            arg1 = line
+
         if self.game.state == "Moving":
-            self.game.use_item(arg)
+            if arg1 == '':
+                return
+            if arg2 == 0:
+                self.game.use_item(arg1)
+            elif arg1 != '' and arg2 != 0:
+                self.game.use_item(arg1, arg2)
         else:
             print("You cannot do that right now")
 
@@ -831,6 +856,12 @@ class Commands(cmd.Cmd):
             self.game.trigger_dev_card(self.game.time)
         else:
             print("Cannot currently draw a card")
+
+    # DELETE LATER, DEV COMMANDS FOR TESTING
+    def do_give(self, line):
+        self.game.player.add_item("Oil", 2)
+    def do_give2(self, line):
+        self.game.player.add_item("Candle", 1)
 
     def do_run(self, direction):
         """Given a direction will flee attacking zombies at a price of one health"""
