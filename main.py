@@ -396,7 +396,7 @@ class Game:
         else:
             self.state = "Attacking"
 
-    def trigger_room_effect(self, room_name):
+    def trigger_room_effect(self, room_name):  # Used for the Garden and Kitchen special room effects
         if room_name == "Garden":
             self.player.add_health(1)
             print(f"After ending your turn in the {room_name} you have gained one health")
@@ -437,7 +437,7 @@ class Game:
             print("These items cannot be used right now")
             return
 
-    def choose_door(self, direction):
+    def choose_door(self, direction):  # used to select where a door will be made during a zombie door attack
         if direction in self.chosen_tile.doors:
             print("Choose a NEW door not an existing one")
             return False
@@ -448,14 +448,18 @@ class Game:
                   f" fight or the run command to flee")
             self.state = "Attacking"
 
-    def search_for_totem(self):
+    def search_for_totem(self):  # Used to search for a totem in the evil temple, will force the user to draw a dev card
         if self.get_current_tile().name == "Evil Temple":
-            self.trigger_dev_card(self.time)
-            self.player.found_totem()
+            if self.player.has_totem:
+                print("player already has the totem")
+                return
+            else:
+                self.trigger_dev_card(self.time)
+                self.player.found_totem()
         else:
             print("You cannot search for a totem in this room")
 
-    def bury_totem(self):
+    def bury_totem(self):  #
         if self.get_current_tile().name == "Graveyard":
             if self.player.has_totem:
                 self.trigger_dev_card(self.time)
@@ -792,7 +796,10 @@ class Commands(cmd.Cmd):
     def do_attack(self, arg):
         """Player attacks the zombies"""
         if self.game.state == "Attacking":
-            self.game.trigger_attack(arg)
+            if len(arg) == 0:
+                self.game.trigger_attack()
+            else:
+                self.game.trigger_attack(arg)
             if len(self.game.chosen_tile.doors) == 1 and self.game.chosen_tile.name != "Foyer":
                 self.game.state = "Choosing Door"
                 self.game.get_game()
