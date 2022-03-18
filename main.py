@@ -27,6 +27,7 @@ class Game:
         self.current_move_direction = current_move_direction
         self.current_zombies = 0
         self.can_cower = can_cower
+        self.room_item = None
 
     def start_game(self):
         self.load_tiles()
@@ -312,8 +313,14 @@ class Game:
                     self.state = "Moving"
                     self.get_game()
             else:
-                print("You already have two items, do you want to drop one of them?")
-                self.state = "Dropping Item"  # Create CMD for dropping item
+                self.room_item = [next_card.get_item(), next_card.charges]
+                response = input("You already have two items, do you want to drop one of them? (Y/N) ")
+                if response == "Y" or response == "y":
+                    self.state = "Swapping Item"
+                else: # If player doesn't want to drop item, just move on
+                    self.state = "Moving"
+                    self.room_item = None
+                    self.get_game()
             if self.get_current_tile().name == "Garden" or "Kitchen":
                 self.trigger_room_effect(self.get_current_tile().name)
         elif event[0] == "Zombies":  # Add zombies to the game, begin combat
@@ -848,6 +855,14 @@ class Commands(cmd.Cmd):
         """Drops an item from your hand"""
         if self.game.state != "Game Over":
             self.game.drop_item(item)
+            self.game.get_game()
+    
+    def do_swap(self, line):
+        """Swaps an item in you hand with the one in the room"""
+        if self.game.state == "Swapping Item":
+            self.game.drop_item(line)
+            self.game.player.add_item(self.game.room_item[0], self.game.room_item[1])
+            self.game.room_item = None
             self.game.get_game()
 
     def do_draw(self, line):
