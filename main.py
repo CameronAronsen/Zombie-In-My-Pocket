@@ -29,7 +29,7 @@ class Game:
         self.can_cower = can_cower
         self.room_item = None
 
-    def start_game(self):
+    def start_game(self):  #  Run to initialise the game
         self.load_tiles()
         self.load_dev_cards()
         for tile in self.indoor_tiles:
@@ -84,8 +84,8 @@ class Game:
                     new_tile.set_entrance(d.NORTH)
                 self.indoor_tiles.append(new_tile)
 
-    def draw_tile(self, x, y):
-        if self.get_current_tile().type == "Indoor":
+    def draw_tile(self, x, y):  # Called when the player moves through a door into an un-discovered room to
+        if self.get_current_tile().type == "Indoor":  # get a new tile
             if len(self.indoor_tiles) == 0:
                 return print("No more indoor tiles")
             if self.get_current_tile().name == "Dining Room" \
@@ -123,7 +123,7 @@ class Game:
         self.dev_cards.pop(0)
         self.dev_cards.pop(0)
 
-    def move_player(self, x, y):
+    def move_player(self, x, y):  # Moves the player coordinates to the selected tile, changes game state
         self.player.set_y(y)
         self.player.set_x(x)
         if self.state == "Running":
@@ -131,10 +131,10 @@ class Game:
         else:
             self.state = "Drawing Dev Card"
 
-    def get_tile_at(self, x, y):
+    def get_tile_at(self, x, y):  # Returns the tile given x and y coordinates
         return self.tiles[(x, y)]
 
-    def select_move(self, direction):
+    def select_move(self, direction):  # Takes the player input and runs all checks to make sure the move is valid
         x, y = self.get_destination_coords(direction)
         if self.check_for_door(direction):  # If there's a door where the player tried to move
             self.current_move_direction = direction
@@ -150,8 +150,8 @@ class Game:
                 else:
                     self.move_player(x, y)
 
-    def check_indoor_outdoor_move(self, current_type, move_type):
-        if current_type != move_type and self.get_current_tile().name != "Patio" or "Dining Room":
+    def check_indoor_outdoor_move(self, current_type, move_type):  # Makes sure player can only move outside through
+        if current_type != move_type and self.get_current_tile().name != "Patio" or "Dining Room":  # the dining room
             return False
 
     def get_destination_coords(self, direction):  # Gets the x and y value of the proposed move
@@ -177,8 +177,8 @@ class Game:
             self.chosen_tile = self.tiles[(x, y)]
             return True
 
-    def check_doors_align(self, direction):
-        if self.chosen_tile.name == "Foyer":
+    def check_doors_align(self, direction):  # Makes sure when placing a tile that a door is facing where the player is
+        if self.chosen_tile.name == "Foyer":  # Trying to come from
             return True
         if direction == d.NORTH:
             if d.SOUTH not in self.chosen_tile.doors:
@@ -194,7 +194,7 @@ class Game:
                 return False
         return True
 
-    def check_entrances_align(self):
+    def check_entrances_align(self):  # Makes sure the dining room and patio entrances align
         if self.get_current_tile().entrance == d.NORTH:
             if self.chosen_tile.entrance == d.SOUTH:
                 return True
@@ -209,7 +209,7 @@ class Game:
                 return True
         return print(" Dining room and Patio entrances dont align")
 
-    def check_dining_room_has_exit(self):
+    def check_dining_room_has_exit(self):  # used to make sure the dining room exit is not facing an existing door
         tile = self.chosen_tile
         if tile.name == "Dining Room":
             if self.current_move_direction == d.NORTH and tile.entrance == d.SOUTH:
@@ -223,10 +223,10 @@ class Game:
         else:
             return True
 
-    def place_tile(self, x, y):
+    def place_tile(self, x, y):  # Places the tile into the game map dictionary
         tile = self.chosen_tile
-        self.tiles[(x, y)] = tile
-        self.state = "Moving"
+        self.tiles[(x, y)] = tile  # The location of the tile is stored as a tuple as the key of the dictionary entry
+        self.state = "Moving"  # And the tile is stored as the value
         if tile.type == "Outdoor":
             self.outdoor_tiles.pop(self.outdoor_tiles.index(tile))
         elif tile.type == "Indoor":
@@ -235,7 +235,7 @@ class Game:
     def get_current_tile(self):  # returns the current tile that the player is at
         return self.tiles[self.player.get_x(), self.player.get_y()]
 
-    def rotate(self):
+    def rotate(self):  # Rotates a selected tile one position clockwise during the Rotating state
         tile = self.chosen_tile
         tile.rotate_tile()
         if tile.name == "Foyer":
