@@ -1,4 +1,4 @@
-import pickle
+import shelve
 import cmd
 from classes.directions import Direction as d
 from classes.game import Game
@@ -152,7 +152,7 @@ class Commands(cmd.Cmd):
         else:
             print("Player not ready to move")
 
-    def do_save(self, line):
+    def do_save(self, name):
         """
         Takes a filepath and saves the game to a file
         
@@ -160,14 +160,15 @@ class Commands(cmd.Cmd):
 
         Syntax: save <filepath>
         """
-        if not line:
+        if not name:
             return print("Must enter a valid file name")
         else:
-            if len(self.game.tiles) == 0:
-                return print("Cannot save game with empty map")
-            file_name = line + '.pickle'
-            with open(file_name, 'wb') as f:
-                pickle.dump(self.game, f)
+            file_name = name + '.db'
+            game_shelve = shelve.open("./saves/" + file_name)
+            game_shelve['game'] = self.game
+            self.game.get_game()
+            game_shelve.close()
+        
 
     def do_load(self, name):
         """
@@ -180,13 +181,15 @@ class Commands(cmd.Cmd):
         if not name:
             return print("Must enter a valid file name")
         else:
-            file_name = name + '.pickle'
+            file_name = name + '.db'
             try:
-                with open(file_name, 'rb') as f:
-                    self.game = pickle.load(f)
-                    self.game.get_game()
+                game_shelve = shelve.open("./saves/" + file_name)
+                save = game_shelve['game']
+                self.game = save
+                self.game.get_game()
+                game_shelve.close()
             except FileNotFoundError:
-                print("No File with this name exists")
+                print(f"No File with this name, {file_name} exists")
 
     def do_restart(self, line):
         """
