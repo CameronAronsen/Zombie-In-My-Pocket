@@ -77,7 +77,7 @@ class Database:
             dev_card5 = ('Grisly Femur','Item','None','Zombies',5,'Health',-1,'Unlimited')
             dev_card6 = ('Golf Club','Health',-1,'Zombies',4,'Nothing','None','Unlimited')
             dev_card7 = ('Chainsaw','Zombies',3,'Nothing','None','Zombies',5,2)
-            dev_card8 = ('Can of Soda','Health',1,'Item','None','Zombies',4,1)
+            dev_card8 = ('Can Of Soda','Health',1,'Item','None','Zombies',4,1)
             dev_card9 = ('Candle','Nothing','None','Health',1,'Zombies',4,'Unlimited')
 
             self.create_dev_card(dev_card)
@@ -115,8 +115,9 @@ class Database:
         self.conn.commit()
 
     def create_dev_card(self, tile):
-        sql = ''' INSERT INTO dev_cards(item,event_one,consequence_one,event_two,consequence_two,event_three,consequence_three,charges)
-              VALUES(?,?,?,?,?,?,?,?) '''
+        sql = ''' INSERT INTO dev_cards(item,event_one,consequence_one,
+            event_two,consequence_two,event_three,consequence_three,charges)
+            VALUES(?,?,?,?,?,?,?,?) '''
         cur = self.conn.cursor()
         cur.execute(sql, tile)
         self.conn.commit()

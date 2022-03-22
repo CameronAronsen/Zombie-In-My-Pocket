@@ -58,11 +58,19 @@ class Game:
                      f'The state is {self.state}. {s} \n Special Entrances : {self.chosen_tile.entrance}')
 
     def get_player_status(self):
-        return print(f'It is {self.get_time()} pm \n'
+        return print(f'----------------------------------------------------------------------------\n'
+                     f'Game Status \n'
+                     f'----------------------------------------------------------------------------\n'
+                     f'It is {self.get_time()} pm \n'
+                     f'----------------------------------------------------------------------------\n'
                      f'The player currently has {self.player.get_health()} health \n'
                      f'The player currently has {self.player.get_attack()} attack \n'
-                     f'The players items are {self.player.get_items()}\n'
-                     f'The game state is {self.state}')
+                     f'The players items are {self.player.get_items()} (Item, Charges left)\n'
+                     f'----------------------------------------------------------------------------\n'
+                     f'The current tile is {self.get_current_tile().name} \n'
+                     f'There are currently {len(self.dev_cards)} development cards left in the deck\n'
+                     f'The game state is {self.state}\n'
+                     f'----------------------------------------------------------------------------\n')
 
     def get_time(self):
         return self.time
@@ -332,17 +340,17 @@ class Game:
         player_attack = self.player.get_attack()
         zombies = self.current_zombies
         if len(item) == 2:  # If the player is using two items
-            if "Oil" in item and "Candle" in item:
+            if "oil" in item and "candle" in item:
                 print("You used the oil and the candle to attack the zombies, it kills all of them")
                 self.drop_item("Oil")
                 self.state = "Moving"
                 return
-            elif "Gasoline" in item and "Candle" in item:
+            elif "gasoline" in item and "candle" in item:
                 print("You used the gasoline and the candle to attack the zombies, it kills all of them")
                 self.drop_item("Gasoline")
                 self.state = "Moving"
                 return
-            elif "Gasoline" in item and "Chainsaw" in item:
+            elif "gasoline" in item and "chainsaw" in item:
                 chainsaw_charge = self.player.get_item_charges("Chainsaw")
                 self.player.set_item_charges("Chainsaw", chainsaw_charge + 2)
                 player_attack += 3
@@ -352,22 +360,22 @@ class Game:
                 print("These items cannot be used together, try again")
                 return
         elif len(item) == 1:
-            if "Machete" in item:
+            if "machete" in item:
                 player_attack += 2
-            elif "Chainsaw" in item:
+            elif "chainsaw" in item:
                 if self.player.get_item_charges("Chainsaw") > 0:
                     player_attack += 3
                     self.player.use_item_charge("Chainsaw")
                 else:
                     print("This item has no charges left")            
-            elif "Golf Club" in item or "Grisly Femur" in item or "Board With Nails" in item:
+            elif "golf club" in item or "grisly femur" in item or "board with nails" in item:
                 player_attack += 1
-            elif "Can of Soda" in item:
+            elif "can of soda" in item:
                 self.player.add_health(2)
-                self.drop_item("Can of Soda")
-                print("Used Can of Soda, gained 2 health")
+                self.drop_item("Can Of Soda")
+                print("Used Can Of Soda, gained 2 health")
                 return
-            elif "Oil" in item:
+            elif "oil" in item:
                 self.trigger_run(0)
                 return
             else:
@@ -390,7 +398,6 @@ class Game:
                 self.trigger_room_effect(self.get_current_tile().name)
             self.state = "Moving"
 
-    # DO MOVEMENT INTO ROOM, Call if state is attacking and player wants to run away
     def trigger_run(self, direction, health_lost=-1):
         self.state = "Running"
         self.select_move(direction)
@@ -426,19 +433,19 @@ class Game:
     # Call when player wants to drop an item, and state is dropping item
     def drop_item(self, old_item):
         for item in self.player.get_items():
-            if item[0] == old_item:
+            if item[0] == old_item.title():
                 self.player.remove_item(item)
-                print(f"You dropped the {old_item}")
+                print(f"You dropped the {old_item.title()}")
                 self.state = "Moving"
                 return
         print("That item is not in your inventory")
 
     def use_item(self, *item):
-        if "Can of Soda" in item:
+        if "can of soda" in item:
             self.player.add_health(2)
-            self.drop_item("Can of Soda")
-            print("Used Can of Soda, gained 2 health")
-        elif "Gasoline" in item and "Chainsaw" in item:
+            self.drop_item("Can Of Soda")
+            print("Used Can Of Soda, gained 2 health")
+        elif "gasoline" in item and "chainsaw" in item:
             chainsaw_charge = self.player.get_item_charges("Chainsaw")
             self.player.set_item_charges("Chainsaw", chainsaw_charge + 2)
             self.drop_item("Gasoline")

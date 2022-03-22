@@ -217,20 +217,20 @@ class Commands(cmd.Cmd):
             attack <item>
             attack <item>, <item>
         """
-        arg1 = ''
-        arg2 = 0
+        arg1 = None
+        arg2 = None
         if "," in line:
             arg1, arg2 = [item for item in line.split(", ")]
         else:
             arg1 = line
 
         if self.game.state == "Attacking":
-            if arg1 == '':
+            if arg1 == None:
                 self.game.trigger_attack()
-            elif arg2 == 0:
-                self.game.trigger_attack(arg1)
-            elif arg1 != '' and arg2 != 0:
-                self.game.trigger_attack(arg1, arg2)
+            elif arg2 == None:
+                self.game.trigger_attack(arg1.lower())
+            elif arg1 != None and arg2 != None:
+                self.game.trigger_attack(arg1.lower(), arg2.lower())
 
             if len(self.game.chosen_tile.doors) == 1 and self.game.chosen_tile.name != "Foyer":
                 self.game.state = "Choosing Door"
@@ -254,24 +254,23 @@ class Commands(cmd.Cmd):
             use <item>
             use <item>, <item>
         """
-        arg1 = ''
-        arg2 = 0
+        arg1 = None
+        arg2 = None
         if "," in line:
             arg1, arg2 = [item for item in line.split(", ")]
         else:
             arg1 = line
 
         if self.game.state == "Moving":
-            if arg1 == '':
+            if arg1 == None:
                 return
-            if arg2 == 0:
-                self.game.use_item(arg1)
-            elif arg1 != '' and arg2 != 0:
-                self.game.use_item(arg1, arg2)
+            if arg2 == None:
+                self.game.use_item(arg1.lower())
+            elif arg1 != None and arg2 != None:
+                self.game.use_item(arg1.lower(), arg2.lower())
         else:
             print("You cannot do that right now")
 
-    # Not finished yet, needs testing for spelling
     def do_drop(self, item):
         """
         Drops an item from your inventory
@@ -281,7 +280,7 @@ class Commands(cmd.Cmd):
         Syntax: drop <item>
         """
         if self.game.state != "Game Over":
-            self.game.drop_item(item)
+            self.game.drop_item(item.lower())
             self.game.get_game()
     
     def do_swap(self, line):
@@ -293,7 +292,7 @@ class Commands(cmd.Cmd):
         Syntax: swap <item>
         """
         if self.game.state == "Swapping Item":
-            self.game.drop_item(line)
+            self.game.drop_item(line.lower())
             self.game.player.add_item(self.game.room_item[0], self.game.room_item[1])
             self.game.room_item = None
             self.game.get_game()
@@ -315,7 +314,7 @@ class Commands(cmd.Cmd):
     def do_give(self, line):
         self.game.player.add_item("Oil", 2)
     def do_give2(self, line):
-        self.game.player.add_item("Candle", 1)
+        self.game.player.add_item("Can Of Soda", 1)
 
     def do_run(self, direction):
         """
