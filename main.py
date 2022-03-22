@@ -84,6 +84,7 @@ class Commands(cmd.Cmd):
         valid_inputs = ["n", "e", "s", "w"]
         if direction not in valid_inputs:
             return print("Input a valid direction. (Check choose help for more information)")
+        direction = direction.lower().strip().strip()
         if direction == 'n':
             direction = d.NORTH
         if direction == "e":
@@ -165,6 +166,7 @@ class Commands(cmd.Cmd):
         if not name:
             return print("Must enter a valid file name")
         else:
+            name = name.lower().strip().strip()
             file_name = name + '.db'
             game_shelve = shelve.open("./saves/" + file_name)
             game_shelve['game'] = self.game
@@ -183,6 +185,7 @@ class Commands(cmd.Cmd):
         if not name:
             return print("Must enter a valid file name")
         else:
+            name = name.lower().strip().strip()
             file_name = name + '.db'
             try:
                 game_shelve = shelve.open("./saves/" + file_name)
@@ -228,9 +231,9 @@ class Commands(cmd.Cmd):
             if arg1 == None:
                 self.game.trigger_attack()
             elif arg2 == None:
-                self.game.trigger_attack(arg1.lower())
+                self.game.trigger_attack(arg1.lower().strip())
             elif arg1 != None and arg2 != None:
-                self.game.trigger_attack(arg1.lower(), arg2.lower())
+                self.game.trigger_attack(arg1.lower().strip(), arg2.lower().strip())
 
             if len(self.game.chosen_tile.doors) == 1 and self.game.chosen_tile.name != "Foyer":
                 self.game.state = "Choosing Door"
@@ -265,9 +268,9 @@ class Commands(cmd.Cmd):
             if arg1 == None:
                 return
             if arg2 == None:
-                self.game.use_item(arg1.lower())
+                self.game.use_item(arg1.lower().strip())
             elif arg1 != None and arg2 != None:
-                self.game.use_item(arg1.lower(), arg2.lower())
+                self.game.use_item(arg1.lower().strip(), arg2.lower().strip())
         else:
             print("You cannot do that right now")
 
@@ -280,7 +283,7 @@ class Commands(cmd.Cmd):
         Syntax: drop <item>
         """
         if self.game.state != "Game Over":
-            self.game.drop_item(item.lower())
+            self.game.drop_item(item.lower().strip())
             self.game.get_game()
     
     def do_swap(self, line):
@@ -292,7 +295,7 @@ class Commands(cmd.Cmd):
         Syntax: swap <item>
         """
         if self.game.state == "Swapping Item":
-            self.game.drop_item(line.lower())
+            self.game.drop_item(line.lower().strip().strip())
             self.game.player.add_item(self.game.room_item[0], self.game.room_item[1])
             self.game.room_item = None
             self.game.get_game()
@@ -324,6 +327,7 @@ class Commands(cmd.Cmd):
         
         Syntax: run <direction>
         """
+        direction = direction.lower().strip().strip()
         if self.game.state == "Attacking":
             if direction == 'n':
                 self.game.trigger_run(d.NORTH)
@@ -410,7 +414,6 @@ class Commands(cmd.Cmd):
         """
         if self.game.state != "Game Over":
             self.game.get_player_status()
-
 
 if __name__ == "__main__":
     Commands().cmdloop()
