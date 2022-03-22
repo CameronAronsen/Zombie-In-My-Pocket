@@ -84,7 +84,7 @@ class Commands(cmd.Cmd):
         valid_inputs = ["n", "e", "s", "w"]
         if direction not in valid_inputs:
             return print("Input a valid direction. (Check choose help for more information)")
-        direction = direction.lower().strip().strip()
+        direction = direction.lower().strip()
         if direction == 'n':
             direction = d.NORTH
         if direction == "e":
@@ -166,7 +166,7 @@ class Commands(cmd.Cmd):
         if not name:
             return print("Must enter a valid file name")
         else:
-            name = name.lower().strip().strip()
+            name = name.lower().strip()
             file_name = name + '.db'
             game_shelve = shelve.open("./saves/" + file_name)
             game_shelve['game'] = self.game
@@ -185,7 +185,7 @@ class Commands(cmd.Cmd):
         if not name:
             return print("Must enter a valid file name")
         else:
-            name = name.lower().strip().strip()
+            name = name.lower().strip()
             file_name = name + '.db'
             try:
                 game_shelve = shelve.open("./saves/" + file_name)
@@ -295,7 +295,7 @@ class Commands(cmd.Cmd):
         Syntax: swap <item>
         """
         if self.game.state == "Swapping Item":
-            self.game.drop_item(line.lower().strip().strip())
+            self.game.drop_item(line.lower().strip())
             self.game.player.add_item(self.game.room_item[0], self.game.room_item[1])
             self.game.room_item = None
             self.game.get_game()
@@ -327,7 +327,7 @@ class Commands(cmd.Cmd):
         
         Syntax: run <direction>
         """
-        direction = direction.lower().strip().strip()
+        direction = direction.lower().strip()
         if self.game.state == "Attacking":
             if direction == 'n':
                 self.game.trigger_run(d.NORTH)
