@@ -1,9 +1,9 @@
 import random
 import pandas as pd
-from classes.directions import Direction as d
-from classes.player import Player
-from classes.devcard import DevCard
-from classes.tile import *
+from directions import Direction as d
+from player import Player
+from devcard import DevCard
+from tile import *
 
 class Game:
     def __init__(self, player, time=9, game_map=None, indoor_tiles=None, outdoor_tiles=None, chosen_tile=None,
