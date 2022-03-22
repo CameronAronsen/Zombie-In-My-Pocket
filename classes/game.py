@@ -1,9 +1,10 @@
 import random
 import pandas as pd
-from directions import Direction as d
-from player import Player
-from devcard import DevCard
-from tile import *
+from classes.directions import Direction as d
+from classes.player import Player
+from classes.devcard import DevCard
+from classes.tile import *
+from classes.database import Database
 
 class Game:
     def __init__(self, player, time=9, game_map=None, indoor_tiles=None, outdoor_tiles=None, chosen_tile=None,
@@ -30,6 +31,8 @@ class Game:
         self.room_item = None
 
     def start_game(self):  #  Run to initialise the game
+        self.database = Database()
+        self.database.set_up_databse()
         self.load_tiles()
         self.load_dev_cards()
         for tile in self.indoor_tiles:
@@ -67,20 +70,17 @@ class Game:
 
     # Loads tiles from excel file
     def load_tiles(self):  # Needs Error handling in this method
-        excel_data = pd.read_excel('Tiles.xlsx')
-        tiles = []
-        for name in excel_data.iterrows():
-            tiles.append(name[1].tolist())
+        tiles = self.database.get_tiles()
         for tile in tiles:
-            doors = self.resolve_doors(tile[3], tile[4], tile[5], tile[6])
-            if tile[2] == "Outdoor":
-                new_tile = OutdoorTile(tile[0], tile[1], doors)
-                if tile[0] == "Patio":
+            doors = self.resolve_doors(tile[4], tile[5], tile[6], tile[7])
+            if tile[3] == "Outdoor":
+                new_tile = OutdoorTile(tile[1], tile[2], doors)
+                if tile[1] == "Patio":
                     new_tile.set_entrance(d.NORTH)
                 self.outdoor_tiles.append(new_tile)
-            if tile[2] == "Indoor":
-                new_tile = IndoorTile(tile[0], tile[1], doors)
-                if tile[0] == "Dining Room":
+            if tile[3] == "Indoor":
+                new_tile = IndoorTile(tile[1], tile[2], doors)
+                if tile[1] == "Dining Room":
                     new_tile.set_entrance(d.NORTH)
                 self.indoor_tiles.append(new_tile)
 
@@ -110,13 +110,13 @@ class Game:
 
     # Loads development cards from excel file
     def load_dev_cards(self):
-        card_data = pd.read_excel('DevCards.xlsx')
-        for card in card_data.iterrows():
-            item = card[1][0]
-            event_one = (card[1][1], card[1][2])
-            event_two = (card[1][3], card[1][4])
-            event_three = (card[1][5], card[1][6])
-            charges = card[1][7]
+        dev_cards = self.database.get_dev_cards()
+        for card in dev_cards:
+            item = card[1]
+            event_one = (card[2], card[3])
+            event_two = (card[4], card[5])
+            event_three = (card[6], card[7])
+            charges = card[8]
             dev_card = DevCard(item, charges, event_one, event_two, event_three)
             self.dev_cards.append(dev_card)
         random.shuffle(self.dev_cards)
@@ -488,13 +488,13 @@ class Game:
     @staticmethod
     def resolve_doors(n, e, s, w):
         doors = []
-        if n == 1:
+        if n == '1':
             doors.append(d.NORTH)
-        if e == 1:
+        if e == '1':
             doors.append(d.EAST)
-        if s == 1:
+        if s == '1':
             doors.append(d.SOUTH)
-        if w == 1:
+        if w == '1':
             doors.append(d.WEST)
         return doors
 

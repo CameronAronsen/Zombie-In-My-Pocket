@@ -1,4 +1,4 @@
-from directions import Direction as d
+from classes.directions import Direction as d
 
 class Tile:
     def __init__(self, name, x=16, y=16, effect=None, doors=None, entrance=None):

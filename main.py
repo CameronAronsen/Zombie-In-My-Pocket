@@ -24,6 +24,8 @@ class Commands(cmd.Cmd):
         Syntax: start
         """
         if self.game.state == "Starting":
+            print("Starting new game...")
+            print("Dont worry if it is taking a while to load")
             self.game.start_game()
             self.game.get_game()
         else:
