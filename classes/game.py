@@ -32,7 +32,6 @@ class Game:
 
     def start_game(self):  #  Run to initialise the game
         self.database = Database()
-        self.database.set_up_databse()
         self.load_tiles()
         self.load_dev_cards()
         for tile in self.indoor_tiles:
