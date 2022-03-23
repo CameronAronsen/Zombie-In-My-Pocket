@@ -31,6 +31,9 @@ class Player:
     def get_items(self):
         return self.items
 
+    def get_totem(self):
+        return self.has_totem
+
     def get_item_charges(self, item):
         for check_item in self.get_items():
             if check_item[0] == item:

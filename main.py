@@ -20,9 +20,9 @@ class Commands(cmd.Cmd):
 
     # DELETE LATER, DEV COMMANDS FOR TESTING
     def do_give(self, line):
-        self.game.player.add_item("Chainsaw", 2)
+        self.game.player.add_item("Oil", 1)
     def do_give2(self, line):
-        self.game.player.add_item("Gasoline", 1)
+        self.game.player.add_item("Machete", 1)
     def do_test_draw(self, line):
         self.game.trigger_dev_card(self.game.time)
 
@@ -120,6 +120,7 @@ class Commands(cmd.Cmd):
         """
         if self.game.state == "Moving":
             self.game.select_move(d.NORTH)
+            self.game.set_last_room('n')
             self.game.get_game()
         else:
             print("Player not ready to move")
@@ -134,6 +135,7 @@ class Commands(cmd.Cmd):
         """
         if self.game.state == "Moving":
             self.game.select_move(d.SOUTH)
+            self.game.set_last_room('s')
             self.game.get_game()
         else:
             print("Player not ready to move")
@@ -148,6 +150,7 @@ class Commands(cmd.Cmd):
         """
         if self.game.state == "Moving":
             self.game.select_move(d.EAST)
+            self.game.set_last_room('e')
             self.game.get_game()
         else:
             print("Player not ready to move")
@@ -162,6 +165,7 @@ class Commands(cmd.Cmd):
         """
         if self.game.state == "Moving":
             self.game.select_move(d.WEST)
+            self.game.set_last_room('w')
             self.game.get_game()
         else:
             print("Player not ready to move")
@@ -231,20 +235,24 @@ class Commands(cmd.Cmd):
             attack <item>
             attack <item>, <item>
         """
-        arg1 = None
+        arg1 = ''
         arg2 = None
         if "," in line:
             arg1, arg2 = [item for item in line.split(", ")]
         else:
-            arg1 = None
+            arg1 = line
 
+        player_items = self.game.get_player().get_items()
+        item_names = [item[0] for item in player_items]
         if self.game.state == "Attacking":
-            if arg1 == None:
+            if arg1 == '':
                 self.game.trigger_attack()
             elif arg2 == None:
-                self.game.trigger_attack(arg1.lower().strip())
-            elif arg1 != None and arg2 != None:
-                self.game.trigger_attack(arg1.lower().strip(), arg2.lower().strip())
+                if arg1.title() in item_names:
+                    self.game.trigger_attack(arg1.lower().strip())
+            elif arg1 != '' and arg2 != None:
+                if arg1.title() in item_names and arg2.title() in item_names:
+                    self.game.trigger_attack(arg1.lower().strip(), arg2.lower().strip())
 
             if len(self.game.chosen_tile.doors) == 1 and self.game.chosen_tile.name != "Foyer":
                 self.game.state = "Choosing Door"
@@ -371,6 +379,8 @@ class Commands(cmd.Cmd):
         
         Syntax: search
         """
+        if line == "testing":
+            self.game.search_for_totem(True)
         if self.game.state == "Moving":
             self.game.search_for_totem()
         else:
@@ -417,8 +427,10 @@ class Commands(cmd.Cmd):
         
         Syntax: status
         """
-        if self.game.state != "Game Over":
+        if len(self.game.tiles) != 0 and self.game.state != "Game Over" or self.game.state != "Starting":
             self.game.get_player_status()
+        else:
+            print("Cannot show status at this time")
 
 if __name__ == "__main__":
     Commands().cmdloop()

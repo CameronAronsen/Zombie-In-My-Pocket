@@ -29,6 +29,7 @@ class Game:
         self.current_zombies = 0
         self.can_cower = can_cower
         self.room_item = None
+        self.last_room = None
 
     def start_game(self):  #  Run to initialise the game
         self.database = Database()
@@ -64,6 +65,7 @@ class Game:
                      f'Game Status \n'
                      f'----------------------------------------------------------------------------\n'
                      f'It is {self.get_time()} pm \n'
+                     f'Holding totem: {self.player.get_totem()} \n'
                      f'----------------------------------------------------------------------------\n'
                      f'The player currently has {self.player.get_health()} health \n'
                      f'The player currently has {self.player.get_attack()} attack \n'
@@ -85,6 +87,16 @@ class Game:
     
     def get_player_y(self):
         return self.player.get_y()
+
+    def set_last_room(self, direction):
+        if direction == 'n':
+            self.last_room = d.SOUTH
+        elif direction == 'e':
+            self.last_room = d.WEST
+        elif direction == 's':
+            self.last_room = d.NORTH
+        elif direction == 'w':
+            self.last_room = d.EAST
 
     # Loads tiles from excel file
     def load_tiles(self):  # Needs Error handling in this method
@@ -274,7 +286,9 @@ class Game:
                 return
             else:
                 print("Reshuffling The Deck")
+                self.database = Database()
                 self.load_dev_cards()
+                self.database.close_connection()
                 self.time += 1
 
         dev_card = self.dev_cards[0]
@@ -392,7 +406,8 @@ class Game:
                 print("Used Can Of Soda, gained 2 health")
                 return
             elif "oil" in item:
-                self.trigger_run(0)
+                direction = self.last_room
+                self.trigger_run(direction, 0)
                 return
             else:
                 print("You cannot use this item right now, try again")
@@ -452,7 +467,6 @@ class Game:
             if item[0] == old_item.title():
                 self.player.remove_item(item)
                 print(f"You dropped the {old_item.title()}")
-                self.state = "Moving"
                 return
         print("That item is not in your inventory")
 
@@ -480,11 +494,13 @@ class Game:
                   f" fight or the run command to flee")
             self.state = "Attacking"
 
-    def search_for_totem(self):  # Used to search for a totem in the evil temple, will force the user to draw a dev card
+    def search_for_totem(self, testing=False):  # Used to search for a totem in the evil temple, will force the user to draw a dev card
         if self.get_current_tile().name == "Evil Temple":
             if self.player.has_totem:
                 print("player already has the totem")
                 return
+            elif testing:
+                self.player.found_totem()
             else:
                 self.trigger_dev_card(self.time)
                 self.player.found_totem()
