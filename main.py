@@ -11,9 +11,20 @@ class Commands(cmd.Cmd):
 
     def __init__(self):
         cmd.Cmd.__init__(self)
-        self.prompt = "> "
+        self.prompt = ">> "
         self.player = Player()
         self.game = Game(self.player)
+
+    def get_game(self):
+        return self.game
+
+    # DELETE LATER, DEV COMMANDS FOR TESTING
+    def do_give(self, line):
+        self.game.player.add_item("Chainsaw", 2)
+    def do_give2(self, line):
+        self.game.player.add_item("Gasoline", 1)
+    def do_test_draw(self, line):
+        self.game.trigger_dev_card(self.game.time)
 
     def do_start(self, line):
         """
@@ -225,7 +236,7 @@ class Commands(cmd.Cmd):
         if "," in line:
             arg1, arg2 = [item for item in line.split(", ")]
         else:
-            arg1 = line
+            arg1 = None
 
         if self.game.state == "Attacking":
             if arg1 == None:
@@ -312,12 +323,6 @@ class Commands(cmd.Cmd):
             self.game.trigger_dev_card(self.game.time)
         else:
             print("Cannot currently draw a card")
-
-    # DELETE LATER, DEV COMMANDS FOR TESTING
-    def do_give(self, line):
-        self.game.player.add_item("Oil", 2)
-    def do_give2(self, line):
-        self.game.player.add_item("Can Of Soda", 1)
 
     def do_run(self, direction):
         """

@@ -34,6 +34,8 @@ class Game:
         self.database = Database()
         self.load_tiles()
         self.load_dev_cards()
+        self.database.close_connection()
+        del self.database
         for tile in self.indoor_tiles:
             if tile.name == 'Foyer':  # Game always starts in the Foyer at 16,16
                 self.chosen_tile = tile
@@ -54,7 +56,7 @@ class Game:
             s = "Use the draw command to draw a random development card"
         for door in self.chosen_tile.doors:
             f += door.name + ', '
-        return print(f' The chosen tile is {self.chosen_tile.name}, the available doors in this room are {f}\n '
+        return print(f'{self.player.get_x(), self.player.get_y()} The chosen tile is {self.chosen_tile.name}, the available doors in this room are {f}\n '
                      f'The state is {self.state}. {s} \n Special Entrances : {self.chosen_tile.entrance}')
 
     def get_player_status(self):
@@ -75,6 +77,15 @@ class Game:
     def get_time(self):
         return self.time
 
+    def get_player(self):
+        return self.player
+
+    def get_player_x(self):
+        return self.player.get_x()
+    
+    def get_player_y(self):
+        return self.player.get_y()
+
     # Loads tiles from excel file
     def load_tiles(self):  # Needs Error handling in this method
         tiles = self.database.get_tiles()
@@ -90,6 +101,8 @@ class Game:
                 if tile[1] == "Dining Room":
                     new_tile.set_entrance(d.NORTH)
                 self.indoor_tiles.append(new_tile)
+        random.shuffle(self.indoor_tiles)
+        random.shuffle(self.outdoor_tiles)
 
     def draw_tile(self, x, y):  # Called when the player moves through a door into an un-discovered room to
         if self.get_current_tile().type == "Indoor":  # get a new tile
@@ -103,14 +116,16 @@ class Game:
                 tile.set_y(y)
                 self.chosen_tile = tile
             else:
-                tile = random.choice(self.indoor_tiles)  # Chooses a random indoor tile and places it
+                tile = self.indoor_tiles[0]  # Chooses a random indoor tile and places it
+                self.indoor_tiles.pop()
                 tile.set_x(x)
                 tile.set_y(y)
                 self.chosen_tile = tile
         elif self.get_current_tile().type == "Outdoor":
             if len(self.outdoor_tiles) == 0:
                 return print("No more outdoor tiles")
-            tile = random.choice(self.outdoor_tiles)
+            tile = self.outdoor_tiles[0]
+            self.outdoor_tiles.pop()
             tile.set_x(x)
             tile.set_y(y)
             self.chosen_tile = tile
@@ -277,18 +292,19 @@ class Game:
             return
         elif event[0] == "Health":  # Change health of player
             print("There might be something in this room")
-            self.player.add_health(event[1])
+            health = int(event[1])
+            self.player.add_health(health)
 
-            if event[1] > 0:
-                print(f"You gained {event[1]} health")
+            if health > 0:
+                print(f"You gained {health} health")
                 self.state = "Moving"
-            elif event[1] < 0:
-                print(f"You lost {event[1]} health")
+            elif health < 0:
+                print(f"You lost {health} health")
                 self.state = "Moving"
                 if self.player.get_health() <= 0:
                     self.lose_game()
                     return
-            elif event[1] == 0:
+            elif health == 0:
                 print("You didn't gain or lose any health")
             if len(self.chosen_tile.doors) == 1 and self.chosen_tile.name != "Foyer":
                 self.state = "Choosing Door"

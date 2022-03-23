@@ -133,3 +133,6 @@ class Database:
         cur.execute("SELECT * FROM dev_cards")
         rows = cur.fetchall()
         return rows
+
+    def close_connection(self):
+        self.conn.close()
