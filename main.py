@@ -276,20 +276,28 @@ class Commands(cmd.Cmd):
             use <item>
             use <item>, <item>
         """
-        arg1 = None
+        arg1 = ''
         arg2 = None
         if "," in line:
             arg1, arg2 = [item for item in line.split(", ")]
         else:
             arg1 = line
 
+        player_items = self.game.get_player().get_items()
+        item_names = [item[0] for item in player_items]
         if self.game.state == "Moving":
-            if arg1 == None:
+            if arg1 == '':
                 return
             if arg2 == None:
-                self.game.use_item(arg1.lower().strip())
-            elif arg1 != None and arg2 != None:
-                self.game.use_item(arg1.lower().strip(), arg2.lower().strip())
+                if arg1.title() in item_names:
+                    self.game.use_item(arg1.lower().strip())
+                else:
+                    print("That item is not in you inventory")
+            elif arg1 != '' and arg2 != None:
+                if arg1.title() in item_names and arg2.title() in item_names:
+                    self.game.use_item(arg1.lower().strip(), arg2.lower().strip())
+                else:
+                    print("That item is not in you inventory")
         else:
             print("You cannot do that right now")
 

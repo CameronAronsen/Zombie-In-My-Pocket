@@ -174,6 +174,12 @@ class TestPlayerAttacks(unittest.TestCase):
         current_tile = game.get_current_tile()
         self.assertEqual(current_tile.get_name(), "Foyer")
 
+    def test_cant_attack_with_item_not_in_inventory(self):
+        self.commands.do_load("test_oil_candle")
+        self.commands.do_attack('machete')
+        game = self.commands.get_game() 
+        self.assertEqual(game.state, "Attacking")
+
     def test_run_away(self):
         self.commands.do_load("test_oil_candle")
         self.commands.do_run('e')
@@ -209,6 +215,12 @@ class TestUsingItems(unittest.TestCase):
         self.commands.do_use("Chainsaw")
         game = self.commands.get_game()
         self.assertEqual(game.get_player().get_items()[0][1], 2)
+
+    def test_cant_use_item_not_in_inventory(self):
+        self.commands.do_load("test_totem_pickup")
+        self.commands.do_use("Chainsaw, Gasoline")
+        game = self.commands.get_game()
+        self.assertEqual(game.get_player().get_items()[0], ["Gasoline", 1])
     
     def test_pick_up_totem(self):
         self.commands.do_load("test_totem_pickup")
