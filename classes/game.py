@@ -1,13 +1,23 @@
 import random
 import pandas as pd
-from classes.directions import Direction as d
-from classes.player import Player
-from classes.devcard import DevCard
-from classes.tile import *
-from classes.database import Database
+from directions import Direction as d
+from player import Player
+from devcard import DevCard
+from tile import *
+from database import Database
 
 
 class Game:
+    """
+    >>> player = Player()
+    >>> game = Game(player)
+    >>> game.start_game()
+    >>> game.get_time()
+    9
+    >>> game.place_tile(16, 16)
+    >>> game.check_for_room(16, 16)
+    True
+    """
     def __init__(
         self,
         player,
@@ -88,7 +98,7 @@ class Game:
         for door in self.chosen_tile.doors:
             f += door.name + ", "
         return print(
-            f"{self.player.get_x(), self.player.get_y()} The chosen tile "
+            f"The chosen tile "
             f"is {self.chosen_tile.name}, the available doors "
             f"in this room are {f}\n "
             f"The state is {self.state}. {s}\n "
@@ -117,7 +127,7 @@ class Game:
             f"left in the deck\n"
             f"The game state is {self.state}\n"
             f"--------------------------------------"
-            f"--------------------------------------\n"
+            f"--------------------------------------"
         )
 
     def get_time(self):
@@ -685,3 +695,7 @@ class Game:
 
     def lose_game(self):
         self.state = "Game Over"
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()

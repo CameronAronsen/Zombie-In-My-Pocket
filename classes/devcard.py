@@ -1,4 +1,26 @@
 class DevCard:
+    """
+    >>> devcard = DevCard("Machete", "Unlimited", "Zombies", "Health", "Item")
+    >>> devcard.get_item()
+    'Machete'
+    >>> devcard.get_charges()
+    'Unlimited'
+    >>> devcard.get_event_at_time(9)
+    'Zombies'
+    >>> devcard.get_event_at_time(10)
+    'Health'
+    >>> devcard.get_event_at_time(11)
+    'Item'
+    >>> devcard_two = DevCard("Can Of Soda", "1", "Health", "Health", "Item")
+    >>> devcard_two.get_event_at_time(11)
+    'Item'
+    >>> devcard_two.get_event_at_time(10)
+    'Health'
+    >>> devcard_two.get_item()
+    'Can Of Soda'
+    >>> devcard_two.get_charges()
+    '1'
+    """
     def __init__(self, item, charges, event_one, event_two, event_three):
         self.item = item
         self.charges = charges
@@ -22,3 +44,7 @@ class DevCard:
 
     def get_charges(self):
         return self.charges
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
