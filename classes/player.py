@@ -2,10 +2,11 @@ class Player:
     def __init__(self, attack=1, health=6, x=16, y=16, has_totem=False):
         self.attack = attack
         self.health = health
-        self.x = x  # x Will represent the players position horizontally starts at 16
-        self.y = y  # y will represent the players position vertically starts at 16
+        self.x = x  # x Will represent the players position horizontally
+        self.y = y  # y will represent the players position vertically
         self.items = []  # Holds the players items. Can hold 2 items at a time
         self.has_totem = has_totem
+        self.move_count = 0
 
     def get_health(self):
         return self.health
@@ -43,7 +44,7 @@ class Player:
         for check_item in self.get_items():
             if check_item[0] == item:
                 check_item[1] = charge
-    
+
     def use_item_charge(self, item):
         for check_item in self.get_items():
             if check_item[0] == item:
@@ -67,3 +68,9 @@ class Player:
 
     def get_y(self):
         return self.y
+
+    def get_move_count(self):
+        return self.move_count
+
+    def increment_move_count(self):
+        self.move_count += 1

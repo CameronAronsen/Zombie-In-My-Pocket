@@ -22,7 +22,3 @@ class DevCard:
 
     def get_charges(self):
         return self.charges
-
-    def __str__(self):
-        return "Item: {}, Event 1: {}, Event 2: {}, Event 3: {}".format(self.item, self.event_one, self.event_two,
-                                                                        self.event_three)

@@ -2,8 +2,8 @@ import sqlite3
 from sqlite3 import Error
 import os
 
-class Database:
 
+class Database:
     def __init__(self):
         if os.path.isfile(r".\database\pythonsqlite.db"):
             self.conn = self.create_connection(r".\database\pythonsqlite.db")
@@ -36,22 +36,22 @@ class Database:
             self.create_table(sql_create_tiles_table)
             self.create_table(sql_create_dev_cards_table)
 
-            tile = ('Graveyard','Bury Totem','Outdoor',1,1,0,0)
-            tile2 = ('Yard','None','Outdoor',1,1,1,0)
-            tile3 = ('Sitting Area','None','Outdoor',1,1,1,0)
-            tile4 = ('Yard','None','Outdoor',1,1,1,0)
-            tile5 = ('Yard','None','Outdoor',1,1,1,0)
-            tile6 = ('Patio','None','Outdoor',1,1,0,1)
-            tile7 = ('Garage','None','Outdoor',0,1,1,0)
-            tile8 = ('Garden','Health','Outdoor',1,1,1,0)
-            tile9 = ('Bathroom','Health','Indoor',0,0,0,1)
-            tile10 = ('Family Room','None','Indoor',1,0,1,1)
-            tile11 = ('Kitchen','Health','Indoor',1,0,1,1)
-            tile12 = ('Dining Room','None','Indoor',1,1,1,1)
-            tile13 = ('Storage','Draw','Indoor',0,0,0,1)
-            tile14 = ('Bedroom','None','Indoor',0,0,1,1)
-            tile15 = ('Evil Temple','Find Totem','Indoor',1,0,1,0)
-            tile16 = ('Foyer','None','Indoor',0,0,0,1)
+            tile = ("Graveyard", "Bury Totem", "Outdoor", 1, 1, 0, 0)
+            tile2 = ("Yard", "None", "Outdoor", 1, 1, 1, 0)
+            tile3 = ("Sitting Area", "None", "Outdoor", 1, 1, 1, 0)
+            tile4 = ("Yard", "None", "Outdoor", 1, 1, 1, 0)
+            tile5 = ("Yard", "None", "Outdoor", 1, 1, 1, 0)
+            tile6 = ("Patio", "None", "Outdoor", 1, 1, 0, 1)
+            tile7 = ("Garage", "None", "Outdoor", 0, 1, 1, 0)
+            tile8 = ("Garden", "Health", "Outdoor", 1, 1, 1, 0)
+            tile9 = ("Bathroom", "Health", "Indoor", 0, 0, 0, 1)
+            tile10 = ("Family Room", "None", "Indoor", 1, 0, 1, 1)
+            tile11 = ("Kitchen", "Health", "Indoor", 1, 0, 1, 1)
+            tile12 = ("Dining Room", "None", "Indoor", 1, 1, 1, 1)
+            tile13 = ("Storage", "Draw", "Indoor", 0, 0, 0, 1)
+            tile14 = ("Bedroom", "None", "Indoor", 0, 0, 1, 1)
+            tile15 = ("Evil Temple", "Find Totem", "Indoor", 1, 0, 1, 0)
+            tile16 = ("Foyer", "None", "Indoor", 0, 0, 0, 1)
 
             self.create_tile(tile)
             self.create_tile(tile2)
@@ -70,15 +70,96 @@ class Database:
             self.create_tile(tile15)
             self.create_tile(tile16)
 
-            dev_card = ('Oil','Nothing','None','Item','None','Zombies',6,1)
-            dev_card2 = ('Gasoline','Zombies',4,'Health',-1,'Item','None',1)
-            dev_card3 = ('Board With Nails','Item','None','Zombies',4,'Health',-1,'Unlimited')
-            dev_card4 = ('Machete','Zombies',4,'Health',-1,'Zombies',6,'Unlimited')
-            dev_card5 = ('Grisly Femur','Item','None','Zombies',5,'Health',-1,'Unlimited')
-            dev_card6 = ('Golf Club','Health',-1,'Zombies',4,'Nothing','None','Unlimited')
-            dev_card7 = ('Chainsaw','Zombies',3,'Nothing','None','Zombies',5,2)
-            dev_card8 = ('Can Of Soda','Health',1,'Item','None','Zombies',4,1)
-            dev_card9 = ('Candle','Nothing','None','Health',1,'Zombies',4,'Unlimited')
+            dev_card = (
+                "Oil",
+                "Nothing",
+                "None",
+                "Item",
+                "None",
+                "Zombies",
+                6,
+                1,
+            )
+            dev_card2 = (
+                "Gasoline",
+                "Zombies",
+                4,
+                "Health",
+                -1,
+                "Item",
+                "None",
+                1,
+            )
+            dev_card3 = (
+                "Board With Nails",
+                "Item",
+                "None",
+                "Zombies",
+                4,
+                "Health",
+                -1,
+                "Unlimited",
+            )
+            dev_card4 = (
+                "Machete",
+                "Zombies",
+                4,
+                "Health",
+                -1,
+                "Zombies",
+                6,
+                "Unlimited",
+            )
+            dev_card5 = (
+                "Grisly Femur",
+                "Item",
+                "None",
+                "Zombies",
+                5,
+                "Health",
+                -1,
+                "Unlimited",
+            )
+            dev_card6 = (
+                "Golf Club",
+                "Health",
+                -1,
+                "Zombies",
+                4,
+                "Nothing",
+                "None",
+                "Unlimited",
+            )
+            dev_card7 = (
+                "Chainsaw",
+                "Zombies",
+                3,
+                "Nothing",
+                "None",
+                "Zombies",
+                5,
+                2,
+            )
+            dev_card8 = (
+                "Can Of Soda",
+                "Health",
+                1,
+                "Item",
+                "None",
+                "Zombies",
+                4,
+                1,
+            )
+            dev_card9 = (
+                "Candle",
+                "Nothing",
+                "None",
+                "Health",
+                1,
+                "Zombies",
+                4,
+                "Unlimited",
+            )
 
             self.create_dev_card(dev_card)
             self.create_dev_card(dev_card2)
@@ -90,7 +171,7 @@ class Database:
             self.create_dev_card(dev_card8)
             self.create_dev_card(dev_card9)
 
-    def create_connection(self, db_file): 
+    def create_connection(self, db_file):
         conn = None
         try:
             conn = sqlite3.connect(db_file)
@@ -108,16 +189,16 @@ class Database:
             print(e)
 
     def create_tile(self, tile):
-        sql = ''' INSERT INTO tiles(name,effect,type,North,East,South,West)
-              VALUES(?,?,?,?,?,?,?) '''
+        sql = """ INSERT INTO tiles(name,effect,type,North,East,South,West)
+              VALUES(?,?,?,?,?,?,?) """
         cur = self.conn.cursor()
         cur.execute(sql, tile)
         self.conn.commit()
 
     def create_dev_card(self, tile):
-        sql = ''' INSERT INTO dev_cards(item,event_one,consequence_one,
+        sql = """ INSERT INTO dev_cards(item,event_one,consequence_one,
             event_two,consequence_two,event_three,consequence_three,charges)
-            VALUES(?,?,?,?,?,?,?,?) '''
+            VALUES(?,?,?,?,?,?,?,?) """
         cur = self.conn.cursor()
         cur.execute(sql, tile)
         self.conn.commit()

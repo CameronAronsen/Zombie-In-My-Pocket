@@ -1,7 +1,10 @@
 from classes.directions import Direction as d
 
+
 class Tile:
-    def __init__(self, name, x=16, y=16, effect=None, doors=None, entrance=None):
+    def __init__(
+        self, name, x=16, y=16, effect=None, doors=None, entrance=None
+    ):
         if doors is None:
             doors = []
         self.name = name
@@ -51,25 +54,34 @@ class Tile:
             if door == d.WEST:
                 self.change_door_position(self.doors.index(door), d.NORTH)
 
+
 class IndoorTile(Tile):
-    def __init__(self, name, effect=None, doors=None, x=16, y=16, entrance=None):
+    def __init__(
+        self, name, effect=None, doors=None, x=16, y=16, entrance=None
+    ):
         if doors is None:
             doors = []
         self.type = "Indoor"
         super().__init__(name, x, y, effect, doors, entrance)
 
     def __repr__(self):
-        return f'{self.name}, {self.doors}, {self.type},' \
-               f' {self.x}, {self.y}, {self.effect} \n'
+        return (
+            f"{self.name}, {self.doors}, {self.type},"
+            f" {self.x}, {self.y}, {self.effect} \n"
+        )
 
 
 class OutdoorTile(Tile):
-    def __init__(self, name, effect=None, doors=None, x=16, y=16, entrance=None):
+    def __init__(
+        self, name, effect=None, doors=None, x=16, y=16, entrance=None
+    ):
         if doors is None:
             doors = []
         self.type = "Outdoor"
         super().__init__(name, x, y, effect, doors, entrance)
 
     def __repr__(self):
-        return f'{self.name}, {self.doors}, {self.type},' \
-               f' {self.x}, {self.y}, {self.effect} \n'
+        return (
+            f"{self.name}, {self.doors}, {self.type},"
+            f" {self.x}, {self.y}, {self.effect} \n"
+        )
