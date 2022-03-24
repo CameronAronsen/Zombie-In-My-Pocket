@@ -28,16 +28,6 @@ class Commands(cmd.Cmd):
     def get_game(self):
         return self.game
 
-    # DELETE LATER, DEV COMMANDS FOR TESTING
-    def do_give(self, line):
-        self.game.player.add_item("Machete", 1)
-
-    def do_give2(self, line):
-        self.game.player.add_item("Golf Club", 1)
-
-    def do_test_draw(self, line):
-        self.game.trigger_dev_card(self.game.time)
-
     def do_start(self, line):
         """
         Starts a new game
@@ -247,7 +237,7 @@ class Commands(cmd.Cmd):
                 self.game = save
                 self.game.get_game()
                 game_shelve.close()
-            except Exception as e:
+            except:
                 print(f"No File with this name, {file_name} exists")
 
     def do_restart(self, line):
