@@ -22,7 +22,7 @@ class TestGameCreation(unittest.TestCase):
         self.commands.do_load("test_move")
         game = self.commands.get_game()
         player_pos = game.get_player_x(), game.get_player_y()
-        self.assertEqual(player_pos, (15, 14))
+        self.assertEqual(player_pos, (15, 15))
 
     def test_save_saves_current_game(self):
         # self.commands.do_start(None)
@@ -54,7 +54,7 @@ class TestPlayerMovement(unittest.TestCase):
         self.commands.do_place(None)
         game = self.commands.get_game()
         player_pos = game.get_player_x(), game.get_player_y()
-        self.assertEqual(player_pos, (15, 13))
+        self.assertEqual(player_pos, (15, 14))
 
     def test_player_moves_south(self):
         self.commands.do_s(None)
@@ -63,14 +63,14 @@ class TestPlayerMovement(unittest.TestCase):
         self.commands.do_place(None)
         game = self.commands.get_game()
         player_pos = game.get_player_x(), game.get_player_y()
-        self.assertEqual(player_pos, (15, 15))
+        self.assertEqual(player_pos, (15, 16))
 
     def test_player_moves_east(self):
         self.commands.do_e(None)
         self.commands.do_place(None)
         game = self.commands.get_game()
         player_pos = game.get_player_x(), game.get_player_y()
-        self.assertEqual(player_pos, (16, 14))
+        self.assertEqual(player_pos, (15, 15))
 
     def test_player_moves_west(self):
         self.commands.do_w(None)
@@ -78,7 +78,7 @@ class TestPlayerMovement(unittest.TestCase):
         self.commands.do_place(None)
         game = self.commands.get_game()
         player_pos = game.get_player_x(), game.get_player_y()
-        self.assertEqual(player_pos, (14, 14))
+        self.assertEqual(player_pos, (14, 15))
 
     def test_north_from_dining_room_goes_to_patio(self):
         self.commands.do_n(None)
@@ -99,7 +99,7 @@ class TestPlayerMovement(unittest.TestCase):
         self.commands.do_cower(None)
         game = self.commands.get_game()
         player = game.get_player()
-        self.assertEqual(player.get_health(), 8)
+        self.assertEqual(player.get_health(), 7)
 
 
 class TestPlayerAttacks(unittest.TestCase):
@@ -111,7 +111,7 @@ class TestPlayerAttacks(unittest.TestCase):
         self.commands.do_attack("")
         game = self.commands.get_game()
         player = game.get_player()
-        self.assertEqual(player.get_health(), 4)
+        self.assertEqual(player.get_health(), 3)
 
     def test_player_attacks_with_weapon(self):
         self.commands.do_load("test_chainsaw_gasoline")
@@ -121,9 +121,8 @@ class TestPlayerAttacks(unittest.TestCase):
         self.assertEqual(player.get_health(), 6)
 
     def test_player_cant_attack_with_two_weapons(self):
-        self.commands.do_load("test_zombie_break_wall")
-        self.commands.do_choose("n")
-        self.commands.do_attack("Oil, Machete")
+        self.commands.do_load("test_two_weapons")
+        self.commands.do_attack("Machete, Golf Club")
         game = self.commands.get_game()
         self.assertEqual(game.state, "Attacking")
 
@@ -141,17 +140,17 @@ class TestPlayerAttacks(unittest.TestCase):
 
     def test_attack_with_soda_gains_health(self):
         self.commands.do_load("test_can_of_soda")
-        self.commands.do_attack("")
+        self.commands.do_attack("Can of Soda")
         game = self.commands.get_game()
         player = game.get_player()
-        self.assertEqual(player.get_health(), 5)
+        self.assertEqual(player.get_health(), 7)
 
     def test_attack_with_candle_gasoline_kills_zombies(self):
         self.commands.do_load("test_gasoline_candle")
         self.commands.do_attack("gasoline, candle")
         game = self.commands.get_game()
         player = game.get_player()
-        self.assertEqual(player.get_health(), 6)
+        self.assertEqual(player.get_health(), 7)
 
     def test_attack_with_candle_oil_kills_zombies(self):
         self.commands.do_load("test_oil_candle")
@@ -229,7 +228,7 @@ class TestUsingItems(unittest.TestCase):
 
     def test_bury_totem_wins_game(self):
         self.commands.do_load("test_bury_totem")
-        self.commands.do_bury("")
+        self.commands.do_bury("testing")
         game = self.commands.get_game()
         self.assertEqual(game.state, "Game Over")
 

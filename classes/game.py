@@ -225,7 +225,6 @@ class Game:
                 tile = self.indoor_tiles[
                     0
                 ]  # Chooses a random indoor tile and places it
-                self.indoor_tiles.pop()
                 tile.set_x(x)
                 tile.set_y(y)
                 self.chosen_tile = tile
@@ -233,12 +232,11 @@ class Game:
             if len(self.outdoor_tiles) == 0:
                 return print("No more outdoor tiles")
             tile = self.outdoor_tiles[0]
-            self.outdoor_tiles.pop()
             tile.set_x(x)
             tile.set_y(y)
             self.chosen_tile = tile
 
-    # Loads development cards from excel file
+    # Loads development cards
     def load_dev_cards(self):
         dev_cards = self.database.get_dev_cards()
         for card in dev_cards:
@@ -700,15 +698,16 @@ class Game:
         else:
             print("You cannot search for a totem in this room")
 
-    def bury_totem(self):  #
+    def bury_totem(self, testing):
         if self.get_current_tile().name == "Graveyard":
             if self.player.has_totem:
                 self.trigger_dev_card(self.time)
                 if self.player.health != 0:
                     print("You Won")
                     self.state = "Game Over"
-                    finish_screen = FinishScreen(True, self)
-                    finish_screen.start()
+                    if not testing:
+                        finish_screen = FinishScreen(True, self)
+                        finish_screen.start()
         else:
             print("Cannot bury totem here")
 

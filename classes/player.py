@@ -95,5 +95,8 @@ class Player:
     def get_move_count(self):
         return self.move_count
 
+    def set_move_count(self, count):
+        self.move_count = count
+
     def increment_move_count(self):
         self.move_count += 1

@@ -30,10 +30,10 @@ class Commands(cmd.Cmd):
 
     # DELETE LATER, DEV COMMANDS FOR TESTING
     def do_give(self, line):
-        self.game.player.add_item("Oil", 1)
+        self.game.player.add_item("Machete", 1)
 
     def do_give2(self, line):
-        self.game.player.add_item("Machete", 1)
+        self.game.player.add_item("Golf Club", 1)
 
     def do_test_draw(self, line):
         self.game.trigger_dev_card(self.game.time)
@@ -239,7 +239,7 @@ class Commands(cmd.Cmd):
             name = name.lower().strip()
             file_name = name + ".db"
             try:
-                file_exists = os.path.exists("./saves/" + file_name)
+                file_exists = os.path.exists("./saves/" + file_name + ".dat")
                 if not file_exists:
                     raise FileNotFoundError
                 game_shelve = shelve.open("./saves/" + file_name)
@@ -247,7 +247,7 @@ class Commands(cmd.Cmd):
                 self.game = save
                 self.game.get_game()
                 game_shelve.close()
-            except:
+            except Exception as e:
                 print(f"No File with this name, {file_name} exists")
 
     def do_restart(self, line):
@@ -358,9 +358,14 @@ class Commands(cmd.Cmd):
 
         Syntax: drop <item>
         """
+        player_items = self.game.get_player().get_items()
+        item_names = [item[0] for item in player_items]
         if self.game.state != "Game Over":
-            self.game.drop_item(item.lower().strip())
-            self.game.get_game()
+            if item.title() in item_names:
+                self.game.drop_item(item.lower().strip())
+                self.game.get_game()
+            else:
+                print("That item is not in your inventory")
 
     def do_swap(self, line):
         """
@@ -370,13 +375,18 @@ class Commands(cmd.Cmd):
 
         Syntax: swap <item>
         """
+        player_items = self.game.get_player().get_items()
+        item_names = [item[0] for item in player_items]
         if self.game.state == "Swapping Item":
-            self.game.drop_item(line.lower().strip())
-            self.game.player.add_item(
-                self.game.room_item[0], self.game.room_item[1]
-            )
-            self.game.room_item = None
-            self.game.get_game()
+            if line.title() in item_names:
+                self.game.drop_item(line.lower().strip())
+                self.game.player.add_item(
+                    self.game.room_item[0], self.game.room_item[1]
+                )
+                self.game.room_item = None
+                self.game.get_game()
+            else:
+                print("That item is not in your inventory, try again")
 
     def do_draw(self, line):
         """
@@ -442,7 +452,7 @@ class Commands(cmd.Cmd):
 
         Syntax: search
         """
-        if line == "testing":
+        if line == "testing":  # Used for testing
             self.game.search_for_totem(True)
         if self.game.state == "Moving":
             self.game.search_for_totem()
@@ -458,7 +468,10 @@ class Commands(cmd.Cmd):
         Syntax: bury
         """
         if self.game.state == "Moving":
-            self.game.bury_totem()
+            if line == "testing":
+                self.game.bury_totem(True)
+            else:
+                self.game.bury_totem(False)
         else:
             print("Cannot currently bury the totem")
 
