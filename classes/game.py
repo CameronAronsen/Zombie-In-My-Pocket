@@ -1,5 +1,7 @@
 import random
+from tkinter import N
 import pandas as pd
+import os
 from classes.directions import Direction as d
 from classes.player import Player
 from classes.devcard import DevCard
@@ -706,10 +708,26 @@ class Game:
                     print("You Won")
                     self.state = "Game Over"
                     if not testing:
-                        finish_screen = FinishScreen(True, self)
+                        file = self.save_game_stats()
+                        finish_screen = FinishScreen(True, file)
                         finish_screen.start()
         else:
             print("Cannot bury totem here")
+
+    def save_game_stats(self):
+        filecount = len(os.listdir("./game_stats"))
+        filename = f"./game_stats/game_stats_{filecount + 1}.txt"
+        with open(filename, "a") as file:
+            file.write(f"{self.get_time()}\n"
+                       f"{self.player.get_totem()}\n"
+                       f"{self.player.get_health()}\n"
+                       f"{self.player.get_attack()}\n"
+                       f"{self.player.get_items()}\n"
+                       f"{self.get_player_moves()}\n"
+                       f"{self.get_tiles_placed()}\n"
+                       f"{self.get_dev_cards_used()}\n"
+                       f"{self.get_attacks_completed()}\n")
+        return filename
 
     def check_for_dead_player(self):
         if self.player.health <= 0:
@@ -732,7 +750,8 @@ class Game:
 
     def lose_game(self):
         self.state = "Game Over"
-        finish_screen = FinishScreen(False, self)
+        file = self.save_game_stats()
+        finish_screen = FinishScreen(False, file)
         finish_screen.start()
 
 if __name__ == "__main__":

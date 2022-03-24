@@ -25,10 +25,10 @@ class TestGameCreation(unittest.TestCase):
         self.assertEqual(player_pos, (15, 15))
 
     def test_save_saves_current_game(self):
-        # self.commands.do_start(None)
-        # self.commands.do_place(None)
-        # self.commands.do_save("test_saving")
-        # self.assertTrue(exists("./saves/test_saving.db.dat"))
+        self.commands.do_start(None)
+        self.commands.do_place(None)
+        self.commands.do_save("test_saving")
+        self.assertTrue(exists("./saves/test_saving.db.dat"))
         pass
 
     def test_restart_restarts_game(self):

@@ -5,50 +5,57 @@ import tkinter as tk
 
 class FinishScreen():
 
-    def __init__(self, win, game):
-        self.game = game
+    def __init__(self, win, game_stats):
+        self.game = game_stats
+        with open(self.game) as stats:
+            self.lines = stats.readlines()
+        self.lines = [line.strip() for line in self.lines]
         self.window = tk.Tk()
         self.window.geometry("400x400")
         if win:
             self.won_game()
         else:
             self.lost_game()
+        
+        self.list_stats()
 
     def won_game(self):
         self.create_title("You Won The Game!", self.window)
-        self.create_frame()
-        self.create_label(self.game.get_time(), self.frame)
 
     def lost_game(self):
         self.create_title("You Lost The Game!", self.window)
+
+    def list_stats(self):
         self.create_frame()
-        self.create_label("Stats", self.frame)
-        self.create_label(f"The time is: {self.game.get_time()}pm",
+        self.create_label("", self.frame)
+        self.create_sub_title("Stats", self.frame)
+        self.create_label("", self.frame)
+        self.create_label(f"The time is: {self.lines[0]}pm",
                           self.frame)
-        self.create_label(f"Holding Totem: {self.game.player.get_totem()}",
-                          self.frame)
-
-        self.create_label(f"You lost with: {self.game.player.get_health()} health",
-                          self.frame)
-
-        self.create_label(f"You had: {self.game.player.get_attack()} health",
+        self.create_label(f"Holding Totem: {self.lines[1]}",
                           self.frame)
 
-        self.create_label(f"Your items were: {self.game.player.get_items()}",
+        self.create_label(f"You had: {self.lines[2]} health",
                           self.frame)
 
-        self.create_label(f"You moved {self.game.get_player_moves()} times",
+        self.create_label(f"You had: {self.lines[3]} attack",
                           self.frame)
 
-        self.create_label(f"You placed {self.game.get_tiles_placed()} tiles",
+        self.create_label(f"Your items were: {self.lines[4]}",
                           self.frame)
 
-        self.create_label(f"You used {self.game.get_dev_cards_used()} development cards",
+        self.create_label(f"You moved {self.lines[5]} times",
                           self.frame)
 
-        self.create_label(f"You attacked {self.game.get_attacks_completed()} times",
+        self.create_label(f"You placed {self.lines[6]} tiles",
                           self.frame)
 
+        self.create_label(f"You used {self.lines[7]} development cards",
+                          self.frame)
+
+        self.create_label(f"You attacked {self.lines[8]} times",
+                          self.frame)
+    
     def start(self):
         self.window.mainloop()
 
@@ -61,5 +68,9 @@ class FinishScreen():
         self.label.pack()
 
     def create_title(self, text, frame):
-        self.label = tk.Label(frame, text=text, font='bold')
+        self.label = tk.Label(frame, text=text, font=(None, 24, 'bold'))
+        self.label.pack()
+
+    def create_sub_title(self, text, frame):
+        self.label = tk.Label(frame, text=text, font=(None, 18, 'bold'))
         self.label.pack()
