@@ -5,6 +5,7 @@ from classes.player import Player
 from classes.devcard import DevCard
 from classes.tile import *
 from classes.database import Database
+from classes.finish_menu import FinishScreen
 
 
 class Game:
@@ -65,6 +66,9 @@ class Game:
         self.can_cower = can_cower
         self.room_item = None
         self.last_room = None
+        self.dev_cards_used = 0
+        self.tiles_placed = 0
+        self.attack_count = 0
 
     #  Run to initialise the game
     def start_game(self):
@@ -149,8 +153,29 @@ class Game:
     def get_player_y(self):
         return self.player.get_y()
 
+    def get_player_moves(self):
+        return self.player.get_move_count()
+
+    def get_dev_cards_used(self):
+        return self.dev_cards_used
+
+    def get_tiles_placed(self):
+        return self.tiles_placed
+
+    def get_attacks_completed(self):
+        return self.attack_count
+
     def update_player_move(self):
         self.player.increment_move_count()
+
+    def update_tiles_placed(self):
+        self.tiles_placed += 1
+
+    def update_dev_cards_used(self):
+        self.dev_cards_used += 1
+
+    def update_attacks(self):
+        self.attack_count += 1
 
     def set_last_room(self, direction):
         if direction == "n":
@@ -397,7 +422,7 @@ class Game:
     # Call when player enters a room and draws a dev card
     def trigger_dev_card(self, time):
         if len(self.dev_cards) == 0:
-            if self.get_time == 11:
+            if self.get_time() >= 11:
                 print("You have run out of time")
                 self.lose_game()
                 return
@@ -406,6 +431,7 @@ class Game:
                 self.database = Database()
                 self.load_dev_cards()
                 self.database.close_connection()
+                del self.database
                 self.time += 1
 
         dev_card = self.dev_cards[0]
@@ -456,7 +482,7 @@ class Game:
             event[0] == "Item"
         ):  # Add item to player's inventory if there is room
             if len(self.dev_cards) == 0:
-                if self.get_time == 11:
+                if self.get_time() >= 11:
                     print("You have run out of time")
                     self.lose_game()
                     return
@@ -681,6 +707,8 @@ class Game:
                 if self.player.health != 0:
                     print("You Won")
                     self.state = "Game Over"
+                    finish_screen = FinishScreen(True, self)
+                    finish_screen.start()
         else:
             print("Cannot bury totem here")
 
@@ -705,6 +733,8 @@ class Game:
 
     def lose_game(self):
         self.state = "Game Over"
+        finish_screen = FinishScreen(False, self)
+        finish_screen.start()
 
 if __name__ == "__main__":
     import doctest

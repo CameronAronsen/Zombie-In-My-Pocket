@@ -1,6 +1,7 @@
 import shelve
 import cmd
 import sys
+import os
 from classes.directions import Direction as d
 from classes.game import Game
 from classes.player import Player
@@ -108,6 +109,7 @@ class Commands(cmd.Cmd):
                         "the way you came from"
                     )
             self.game.player.increment_move_count()
+            self.game.update_tiles_placed()
             self.game.get_game()
         else:
             print("Tile not chosen to place")
@@ -237,12 +239,15 @@ class Commands(cmd.Cmd):
             name = name.lower().strip()
             file_name = name + ".db"
             try:
+                file_exists = os.path.exists("./saves/" + file_name)
+                if not file_exists:
+                    raise FileNotFoundError
                 game_shelve = shelve.open("./saves/" + file_name)
                 save = game_shelve["game"]
                 self.game = save
                 self.game.get_game()
                 game_shelve.close()
-            except FileNotFoundError:
+            except:
                 print(f"No File with this name, {file_name} exists")
 
     def do_restart(self, line):
@@ -289,7 +294,7 @@ class Commands(cmd.Cmd):
                     self.game.trigger_attack(
                         arg1.lower().strip(), arg2.lower().strip()
                     )
-
+            self.game.update_attacks()
             if (
                 len(self.game.chosen_tile.doors) == 1 and
                 self.game.chosen_tile.name != "Foyer"
@@ -382,6 +387,7 @@ class Commands(cmd.Cmd):
         Syntax: draw
         """
         if self.game.state == "Drawing Dev Card":
+            self.game.update_dev_cards_used()
             self.game.trigger_dev_card(self.game.time)
         else:
             print("Cannot currently draw a card")

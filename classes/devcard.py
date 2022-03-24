@@ -31,7 +31,7 @@ class DevCard:
         self.event_three = event_three
 
         if self.charges != "Unlimited":
-            int(self.charges)
+            self.charges = int(self.charges)
 
     def get_event_at_time(self, time):
         if time == 9:
