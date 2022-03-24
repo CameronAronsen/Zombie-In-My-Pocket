@@ -9,6 +9,7 @@ class FinishScreen():
         self.game = game_stats
         with open(self.game) as stats:
             self.lines = stats.readlines()
+            stats.close()
         self.lines = [line.strip() for line in self.lines]
         self.window = tk.Tk()
         self.window.geometry("400x400")

@@ -473,7 +473,7 @@ class Commands(cmd.Cmd):
 
         Syntax: prompt <new prompt>
         """
-        self.prompt = line + ": "
+        self.prompt = line + ' '
 
     def do_exit(self, line):
         """
