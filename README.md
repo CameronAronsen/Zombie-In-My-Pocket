@@ -9,6 +9,10 @@ Database:
     - Contains the database files for the game
     - This database contains information about the tiles, as well as development cards
 
+Game_stats:
+    - When the player finishes the game, this is where their stats are saved
+    - This is then used to display a window with these stats
+
 Saves:
     - This is the folder where the game saves are located.
     - Most of these are testing and unittest saves
