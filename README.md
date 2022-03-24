@@ -19,3 +19,6 @@ Main.py:
 
 Unittests.py:
     - These contain the unittests for the code. run this to run the unittests.
+
+Doctests.py:
+    - Runs the doctests that are used accross the files

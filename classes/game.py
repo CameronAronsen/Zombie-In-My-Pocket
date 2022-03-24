@@ -1,14 +1,20 @@
 import random
 import pandas as pd
-from directions import Direction as d
-from player import Player
-from devcard import DevCard
-from tile import *
-from database import Database
+from classes.directions import Direction as d
+from classes.player import Player
+from classes.devcard import DevCard
+from classes.tile import *
+from classes.database import Database
 
 
 class Game:
     """
+    >>> from classes.game import Game
+    >>> from classes.player import Player
+    >>> from classes.tile import *
+    >>> from classes.database import Database
+    >>> from classes.devcard import DevCard
+    >>> from classes.directions import Direction as d
     >>> player = Player()
     >>> game = Game(player)
     >>> game.start_game()
@@ -17,6 +23,7 @@ class Game:
     >>> game.place_tile(16, 16)
     >>> game.check_for_room(16, 16)
     True
+
     """
     def __init__(
         self,
@@ -141,6 +148,9 @@ class Game:
 
     def get_player_y(self):
         return self.player.get_y()
+
+    def update_player_move(self):
+        self.player.increment_move_count()
 
     def set_last_room(self, direction):
         if direction == "n":

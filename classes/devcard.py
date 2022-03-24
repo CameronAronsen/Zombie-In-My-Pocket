@@ -1,5 +1,6 @@
 class DevCard:
     """
+    >>> from classes.devcard import DevCard
     >>> devcard = DevCard("Machete", "Unlimited", "Zombies", "Health", "Item")
     >>> devcard.get_item()
     'Machete'
@@ -20,6 +21,7 @@ class DevCard:
     'Can Of Soda'
     >>> devcard_two.get_charges()
     '1'
+
     """
     def __init__(self, item, charges, event_one, event_two, event_three):
         self.item = item
@@ -44,7 +46,3 @@ class DevCard:
 
     def get_charges(self):
         return self.charges
-
-if __name__ == "__main__":
-    import doctest
-    doctest.testmod()

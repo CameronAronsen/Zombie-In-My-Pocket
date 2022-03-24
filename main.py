@@ -1,5 +1,6 @@
 import shelve
 import cmd
+import sys
 from classes.directions import Direction as d
 from classes.game import Game
 from classes.player import Player
@@ -17,6 +18,11 @@ class Commands(cmd.Cmd):
         self.prompt = ">> "
         self.player = Player()
         self.game = Game(self.player)
+        if len(sys.argv) > 1:
+            try:
+                self.do_load(sys.argv[1])
+            except:
+                print("File not found")
 
     def get_game(self):
         return self.game
@@ -146,6 +152,7 @@ class Commands(cmd.Cmd):
         if self.game.state == "Moving":
             self.game.select_move(d.NORTH)
             self.game.set_last_room("n")
+            self.game.update_player_move()
             self.game.get_game()
         else:
             print("Player not ready to move")
@@ -161,6 +168,7 @@ class Commands(cmd.Cmd):
         if self.game.state == "Moving":
             self.game.select_move(d.SOUTH)
             self.game.set_last_room("s")
+            self.game.update_player_move()
             self.game.get_game()
         else:
             print("Player not ready to move")
@@ -176,6 +184,7 @@ class Commands(cmd.Cmd):
         if self.game.state == "Moving":
             self.game.select_move(d.EAST)
             self.game.set_last_room("e")
+            self.game.update_player_move()
             self.game.get_game()
         else:
             print("Player not ready to move")
@@ -191,6 +200,7 @@ class Commands(cmd.Cmd):
         if self.game.state == "Moving":
             self.game.select_move(d.WEST)
             self.game.set_last_room("w")
+            self.game.update_player_move()
             self.game.get_game()
         else:
             print("Player not ready to move")

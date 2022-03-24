@@ -1,11 +1,14 @@
-from directions import Direction as d
+from classes.directions import Direction as d
 
 
 class Tile:
     """
+    >>> from classes.tile import Tile
+    >>> from classes.directions import Direction as d
     >>> tile = Tile("Patio", x=0, y=0)
     >>> tile.get_name()
     'Patio'
+
     """
     def __init__(
         self, name, x=16, y=16, effect=None, doors=None, entrance=None
@@ -71,6 +74,8 @@ class Tile:
 
 class IndoorTile(Tile):
     """
+    >>> from classes.tile import IndoorTile
+    >>> from classes.directions import Direction as d
     >>> tile = IndoorTile("Family Room", x=0, y=0)
     >>> tile.get_name()
     'Family Room'
@@ -88,6 +93,7 @@ class IndoorTile(Tile):
     1
     >>> tile.get_y()
     1
+
     """
     def __init__(
         self, name, effect=None, doors=None, x=16, y=16, entrance=None
@@ -106,6 +112,8 @@ class IndoorTile(Tile):
 
 class OutdoorTile(Tile):
     """
+    >>> from classes.tile import OutdoorTile
+    >>> from classes.directions import Direction as d
     >>> tile = OutdoorTile("Graveyard", x=0, y=0)
     >>> tile.get_name()
     'Graveyard'
@@ -124,6 +132,7 @@ class OutdoorTile(Tile):
     10
     >>> tile.get_y()
     15
+
     """
     def __init__(
         self, name, effect=None, doors=None, x=16, y=16, entrance=None
@@ -138,7 +147,3 @@ class OutdoorTile(Tile):
             f"{self.name}, {self.doors}, {self.type},"
             f" {self.x}, {self.y}, {self.effect}"
         )
-
-if __name__ == "__main__":
-    import doctest
-    doctest.testmod()
