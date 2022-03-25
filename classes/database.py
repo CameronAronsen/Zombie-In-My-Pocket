@@ -21,7 +21,7 @@ class Database:
                                             West text NOT NULL
                                         );"""
 
-            sql_create_dev_cards_table = """ CREATE TABLE IF NOT EXISTS dev_cards (
+            sql_dev_cards_table = """ CREATE TABLE IF NOT EXISTS dev_cards (
                                             id integer PRIMARY KEY,
                                             item text NOT NULL,
                                             event_one text NOT NULL,
@@ -34,7 +34,7 @@ class Database:
                                         );"""
 
             self.create_table(sql_create_tiles_table)
-            self.create_table(sql_create_dev_cards_table)
+            self.create_table(sql_dev_cards_table)
 
             tile = ("Graveyard", "Bury Totem", "Outdoor", 1, 1, 0, 0)
             tile2 = ("Yard", "None", "Outdoor", 1, 1, 1, 0)

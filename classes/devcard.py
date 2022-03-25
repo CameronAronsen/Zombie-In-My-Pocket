@@ -20,7 +20,7 @@ class DevCard:
     >>> devcard_two.get_item()
     'Can Of Soda'
     >>> devcard_two.get_charges()
-    '1'
+    1
 
     """
     def __init__(self, item, charges, event_one, event_two, event_three):

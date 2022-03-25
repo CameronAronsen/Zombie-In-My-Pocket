@@ -26,6 +26,10 @@ class Game:
     >>> game.place_tile(16, 16)
     >>> game.check_for_room(16, 16)
     True
+    >>> game.get_current_tile().name
+    'Foyer'
+    >>> game.check_for_dead_player()
+    False
 
     """
     def __init__(
@@ -189,8 +193,8 @@ class Game:
         elif direction == "w":
             self.last_room = d.EAST
 
-    # Loads tiles from excel file
-    def load_tiles(self):  # Needs Error handling in this method
+    # Loads tiles from database
+    def load_tiles(self):
         tiles = self.database.get_tiles()
         for tile in tiles:
             doors = self.resolve_doors(tile[4], tile[5], tile[6], tile[7])

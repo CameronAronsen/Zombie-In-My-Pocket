@@ -504,4 +504,8 @@ class Commands(cmd.Cmd):
 
 
 if __name__ == "__main__":
-    Commands().cmdloop()
+    try:
+        Commands().cmdloop()
+    except Exception as e:
+        print(e)
+        print("Something went wrong, please restarting")
