@@ -11,7 +11,7 @@ from classes.tile import *
 class Commands(cmd.Cmd):
     intro = (
         "Welcome, type help or ? to list the commands "
-        "or start to start the game"
+        "or 'start' to start the game"
     )
 
     def __init__(self):
