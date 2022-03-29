@@ -1,0 +1,9 @@
+10
+True
+6
+1
+[['Machete', 1], ['Can Of Soda', 1]]
+15
+8
+7
+4

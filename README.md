@@ -3,7 +3,7 @@ Zombie in my pocket is a single player print and play game.
 
 # Contents:
 Classes:
-    - Contains the python classes used in the game
+    Contains the python classes used in the game
 
 Database:
     Contains the database files for the game
