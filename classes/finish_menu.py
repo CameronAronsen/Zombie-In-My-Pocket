@@ -3,6 +3,7 @@ import cmd
 import sys
 import tkinter as tk
 
+
 class FinishScreen():
 
     def __init__(self, win, game_stats):
@@ -17,7 +18,7 @@ class FinishScreen():
             self.won_game()
         else:
             self.lost_game()
-        
+
         self.list_stats()
 
     def won_game(self):
@@ -56,7 +57,7 @@ class FinishScreen():
 
         self.create_label(f"You attacked {self.lines[8]} times",
                           self.frame)
-    
+
     def start(self):
         self.window.mainloop()
 

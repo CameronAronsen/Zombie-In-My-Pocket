@@ -757,7 +757,3 @@ class Game:
         file = self.save_game_stats()
         finish_screen = FinishScreen(False, file)
         finish_screen.start()
-
-if __name__ == "__main__":
-    import doctest
-    doctest.testmod()
