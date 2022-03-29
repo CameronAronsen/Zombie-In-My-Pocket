@@ -508,4 +508,4 @@ if __name__ == "__main__":
         Commands().cmdloop()
     except Exception as e:
         print(e)
-        print("Something went wrong, please restarting")
+        print("Something went wrong, please restart")
