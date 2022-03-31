@@ -2,7 +2,14 @@ import shelve
 import cmd
 import sys
 import tkinter as tk
-
+import matplotlib as mpl
+from matplotlib.figure import Figure
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.backends.backend_tkagg import (
+    FigureCanvasTkAgg, NavigationToolbar2Tk)
+from matplotlib.backend_bases import key_press_handler
+from matplotlib.figure import Figure
 
 class FinishScreen():
 
@@ -13,7 +20,7 @@ class FinishScreen():
             stats.close()
         self.lines = [line.strip() for line in self.lines]
         self.window = tk.Tk()
-        self.window.geometry("400x400")
+        self.window.geometry("1000x800")
         if win:
             self.won_game()
         else:
@@ -57,6 +64,10 @@ class FinishScreen():
 
         self.create_label(f"You attacked {self.lines[8]} times",
                           self.frame)
+        
+        self.create_label("", self.frame)
+
+        self.create_graph()
 
     def start(self):
         self.window.mainloop()
@@ -76,3 +87,18 @@ class FinishScreen():
     def create_sub_title(self, text, frame):
         self.label = tk.Label(frame, text=text, font=(None, 18, 'bold'))
         self.label.pack()
+
+    def create_graph(self):
+        self.stats = self.lines
+        self.titles = ["Health", "Attack", "Moves",
+                       "Tiles Placed", "Development Cards", "Attacks"]
+        self.data = [self.stats[2], self.stats[3], self.stats[5],
+                     self.stats[6], self.stats[7], self.stats[8]]
+        self.data = [float(point) for point in self.data]
+        self.fig = Figure(figsize=(5, 5), dpi=100)
+        self.ax = self.fig.add_axes([0.1, 0.1, 0.8, 0.8])
+        self.ax.bar(self.titles, self.data)
+
+        self.canvas = FigureCanvasTkAgg(self.fig, self.window)
+        self.canvas.draw()
+        self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
