@@ -1,9 +1,6 @@
 import random
-from tkinter import N
-import pandas as pd
 import os
 from classes.directions import Direction as d
-from classes.player import Player
 from classes.devcard import DevCard
 from classes.tile import *
 from classes.database import Database
@@ -48,17 +45,17 @@ class Game:
         if indoor_tiles is None:
             indoor_tiles = (
                 []
-            )  # Will contain a list of all available indoor tiles
+            )
         if outdoor_tiles is None:
             outdoor_tiles = (
                 []
-            )  # Will contain a list of all available outdoor tiles
+            )
         if dev_cards is None:
             dev_cards = (
                 []
-            )  # Will contain a list of all available development cards
+            )
         if game_map is None:
-            game_map = {}  # Tiles dictionary will have the x and y co-ords
+            game_map = {}
         self.player = player
         self.time = time
         self.indoor_tiles = indoor_tiles
@@ -86,11 +83,12 @@ class Game:
         for tile in self.indoor_tiles:
             if (
                 tile.name == "Foyer"
-            ):  # Game always starts in the Foyer at 16,16
+            ):
                 self.chosen_tile = tile
                 self.state = "Rotating"
                 break
 
+    # Tells the player the current status of the game
     def get_game(self):
         s = ""
         f = ""
@@ -122,6 +120,7 @@ class Game:
             f"Special Entrances : {self.chosen_tile.entrance}"
         )
 
+    # Tells the player their status
     def get_player_status(self):
         return print(
             f"--------------------------------------"
@@ -183,6 +182,9 @@ class Game:
     def update_attacks(self):
         self.attack_count += 1
 
+    def increment_player_moves(self):
+        self.player.increment_move_count()
+
     def set_last_room(self, direction):
         if direction == "n":
             self.last_room = d.SOUTH
@@ -211,10 +213,11 @@ class Game:
         random.shuffle(self.indoor_tiles)
         random.shuffle(self.outdoor_tiles)
 
+    # Draws a tile when the player wants to move
     def draw_tile(
         self, x, y
-    ):  # Called when the player moves through a door into room
-        if self.get_current_tile().type == "Indoor":  # get a new tile
+    ):
+        if self.get_current_tile().type == "Indoor":
             if len(self.indoor_tiles) == 0:
                 return print("No more indoor tiles")
             if (
@@ -230,7 +233,7 @@ class Game:
             else:
                 tile = self.indoor_tiles[
                     0
-                ]  # Chooses a random indoor tile and places it
+                ]
                 tile.set_x(x)
                 tile.set_y(y)
                 self.chosen_tile = tile
@@ -261,7 +264,7 @@ class Game:
 
     def move_player(
         self, x, y
-    ):  # Moves the player coordinates to the selected tile, changes state
+    ):
         self.player.set_y(y)
         self.player.set_x(x)
         if self.state == "Running":
@@ -269,16 +272,17 @@ class Game:
         else:
             self.state = "Drawing Dev Card"
 
-    def get_tile_at(self, x, y):  # Returns the tile given x and y coordinates
+    def get_tile_at(self, x, y):
         return self.tiles[(x, y)]
 
+    # Selects a direction the player will move, and move them
     def select_move(
         self, direction
-    ):  # Takes the player input and runs all checks to see if move is valid
+    ):
         x, y = self.get_destination_coords(direction)
         if self.check_for_door(
             direction
-        ):  # If there's a door where the player tried to move
+        ):
             self.current_move_direction = direction
             if self.check_for_room(x, y) is False:
                 if self.state == "Running":
@@ -294,19 +298,20 @@ class Game:
                 else:
                     self.move_player(x, y)
 
+    # Checks if the player is moving indoor or outdoor
     def check_indoor_outdoor_move(
         self, current_type, move_type
-    ):  # Makes sure player can only move outside through
+    ):
         if (
             current_type != move_type and
             self.get_current_tile().name != "Patio" or
             "Dining Room"
-        ):  # the dining room
+        ):
             return False
 
     def get_destination_coords(
         self, direction
-    ):  # Gets the x and y value of the proposed move
+    ):
         if direction == d.NORTH:
             return self.player.get_x(), self.player.get_y() - 1
         if direction == d.SOUTH:
@@ -318,7 +323,7 @@ class Game:
 
     def check_for_door(
         self, direction
-    ):  # Takes a direction and checks if the current room has a door there
+    ):
         if direction in self.get_current_tile().doors:
             return True
         else:
@@ -326,7 +331,7 @@ class Game:
 
     def check_for_room(
         self, x, y
-    ):  # Takes a move direction and checks if there is a room there
+    ):
         if (x, y) not in self.tiles:
             return False
         else:
@@ -335,8 +340,8 @@ class Game:
 
     def check_doors_align(
         self, direction
-    ):  # Makes sure when placing a tile that a door is facing the player
-        if self.chosen_tile.name == "Foyer":  # Trying to come from
+    ):
+        if self.chosen_tile.name == "Foyer":
             return True
         if direction == d.NORTH:
             if d.SOUTH not in self.chosen_tile.doors:
@@ -352,9 +357,10 @@ class Game:
                 return False
         return True
 
+    # Makes sure the dining room and patio entrances align
     def check_entrances_align(
         self,
-    ):  # Makes sure the dining room and patio entrances align
+    ):
         if self.get_current_tile().entrance == d.NORTH:
             if self.chosen_tile.entrance == d.SOUTH:
                 return True
@@ -369,9 +375,10 @@ class Game:
                 return True
         return print(" Dining room and Patio entrances dont align")
 
+    # used to make sure the dining room exit is not facing existing door
     def check_dining_room_has_exit(
         self,
-    ):  # used to make sure the dining room exit is not facing existing door
+    ):
         tile = self.chosen_tile
         if tile.name == "Dining Room":
             if (
@@ -397,25 +404,28 @@ class Game:
         else:
             return True
 
-    def place_tile(self, x, y):  # Places the tile into game map dictionary
+    # Places the tile into game map dictionary
+    def place_tile(self, x, y):
         tile = self.chosen_tile
         self.tiles[
             (x, y)
-        ] = tile  # The tile is stored as a tuple as the key of the dictionary
-        self.state = "Moving"  # And the tile is stored as the value
+        ] = tile
+        self.state = "Moving"
         if tile.type == "Outdoor":
             self.outdoor_tiles.pop(self.outdoor_tiles.index(tile))
         elif tile.type == "Indoor":
             self.indoor_tiles.pop(self.indoor_tiles.index(tile))
 
+    # returns the current tile that the player is at
     def get_current_tile(
         self,
-    ):  # returns the current tile that the player is at
+    ):
         return self.tiles[self.player.get_x(), self.player.get_y()]
 
+    # Rotates a selected tile one position clockwise during Rotating state
     def rotate(
         self,
-    ):  # Rotates a selected tile one position clockwise during Rotating state
+    ):
         tile = self.chosen_tile
         tile.rotate_tile()
         if tile.name == "Foyer":
@@ -456,7 +466,7 @@ class Game:
                 self.state = "Moving"
                 self.get_game()
             return
-        elif event[0] == "Health":  # Change health of player
+        elif event[0] == "Health":
             print("There might be something in this room")
             health = int(event[1])
             self.player.add_health(health)
@@ -484,7 +494,7 @@ class Game:
                 self.get_game()
         elif (
             event[0] == "Item"
-        ):  # Add item to player's inventory if there is room
+        ):
             if len(self.dev_cards) == 0:
                 if self.get_time() >= 11:
                     print("You have run out of time")
@@ -517,25 +527,25 @@ class Game:
                 )
                 if response == "Y" or response == "y":
                     self.state = "Swapping Item"
-                else:  # If player doesn't want to drop item, just move on
+                else:
                     self.state = "Moving"
                     self.room_item = None
                     self.get_game()
             if self.get_current_tile().name == "Garden" or "Kitchen":
                 self.trigger_room_effect(self.get_current_tile().name)
-        elif event[0] == "Zombies":  # Add zombies to the game, begin combat
+        elif event[0] == "Zombies":
             print(
                 f"There are {event[1]} zombies in this room, "
                 f"prepare to fight!"
             )
             self.current_zombies = int(event[1])
-            self.state = "Attacking"  # Create CMD for attacking zombies
+            self.state = "Attacking"
 
     # Call if state is attacking, *items islist of items the player is using
     def trigger_attack(self, *item):
         player_attack = self.player.get_attack()
         zombies = self.current_zombies
-        if len(item) == 2:  # If the player is using two items
+        if len(item) == 2:
             if "oil" in item and "candle" in item:
                 print(
                     "You used the oil and the candle to attack the zombies, "
@@ -605,6 +615,7 @@ class Game:
                 self.trigger_room_effect(self.get_current_tile().name)
             self.state = "Moving"
 
+    # Player runs away from the zombies into another room
     def trigger_run(self, direction, health_lost=-1):
         self.state = "Running"
         self.select_move(direction)
@@ -620,9 +631,10 @@ class Game:
         else:
             self.state = "Attacking"
 
+    # If room has an effect, trigger it
     def trigger_room_effect(
         self, room_name
-    ):  # Used for the Garden and Kitchen special room effects
+    ):
         if room_name == "Garden":
             self.player.add_health(1)
             print(
@@ -638,7 +650,7 @@ class Game:
             )
             self.state = "Moving"
 
-    # If player chooses to cower instead of move to a new room
+    # Player chooses to cower instead of move to a new room
     def trigger_cower(self):
         if self.can_cower:
             self.player.add_health(3)
@@ -651,7 +663,7 @@ class Game:
         else:
             return print("Cannot cower during a zombie door attack")
 
-    # Call when player wants to drop an item, and state is dropping item
+    # Player drops an item
     def drop_item(self, old_item):
         for item in self.player.get_items():
             if item[0] == old_item.title():
@@ -660,6 +672,7 @@ class Game:
                 return
         print("That item is not in your inventory")
 
+    # Player uses an item
     def use_item(self, *item):
         if "can of soda" in item:
             self.player.add_health(2)
@@ -673,9 +686,10 @@ class Game:
             print("These items cannot be used right now")
             return
 
+    # used to select where a door will be made during a zombie door attack
     def choose_door(
         self, direction
-    ):  # used to select where a door will be made during a zombie door attack
+    ):
         if direction in self.chosen_tile.doors:
             print("Choose a NEW door not an existing one")
             return False
@@ -689,9 +703,10 @@ class Game:
             )
             self.state = "Attacking"
 
+    # Used to search for a totem in the evil temple, will draw dev card
     def search_for_totem(
         self, testing=False
-    ):  # Used to search for a totem in the evil temple, will draw dev card
+    ):
         if self.get_current_tile().name == "Evil Temple":
             if self.player.has_totem:
                 print("player already has the totem")
@@ -718,6 +733,7 @@ class Game:
         else:
             print("Cannot bury totem here")
 
+    # Saves players stats at end of a game
     def save_game_stats(self):
         filecount = len(os.listdir("./game_stats"))
         filename = f"./game_stats/game_stats_{filecount + 1}.txt"

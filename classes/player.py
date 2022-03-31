@@ -25,9 +25,9 @@ class Player:
     def __init__(self, attack=1, health=6, x=16, y=16, has_totem=False):
         self.attack = attack
         self.health = health
-        self.x = x  # x Will represent the players position horizontally
-        self.y = y  # y will represent the players position vertically
-        self.items = []  # Holds the players items. Can hold 2 items at a time
+        self.x = x
+        self.y = y
+        self.items = []
         self.has_totem = has_totem
         self.move_count = 0
 

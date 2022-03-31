@@ -1,15 +1,8 @@
-import shelve
-import cmd
-import sys
 import tkinter as tk
-import matplotlib as mpl
 from matplotlib.figure import Figure
-import matplotlib.pyplot as plt
-import numpy as np
-from matplotlib.backends.backend_tkagg import (
-    FigureCanvasTkAgg, NavigationToolbar2Tk)
-from matplotlib.backend_bases import key_press_handler
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
+
 
 class FinishScreen():
 
@@ -64,7 +57,7 @@ class FinishScreen():
 
         self.create_label(f"You attacked {self.lines[8]} times",
                           self.frame)
-        
+
         self.create_label("", self.frame)
 
         self.create_graph()

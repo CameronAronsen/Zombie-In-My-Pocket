@@ -22,7 +22,7 @@ class Commands(cmd.Cmd):
         if len(sys.argv) > 1:
             try:
                 self.do_load(sys.argv[1])
-            except:
+            except Exception:
                 print("File not found")
 
     def get_game(self):
@@ -98,7 +98,7 @@ class Commands(cmd.Cmd):
                         "Must have at least one door facing "
                         "the way you came from"
                     )
-            self.game.player.increment_move_count()
+            self.game.increment_player_moves()
             self.game.update_tiles_placed()
             self.game.get_game()
         else:
@@ -237,7 +237,7 @@ class Commands(cmd.Cmd):
                 self.game = save
                 self.game.get_game()
                 game_shelve.close()
-            except:
+            except FileNotFoundError:
                 print(f"No File with this name, {file_name} exists")
 
     def do_restart(self, line):
@@ -298,7 +298,7 @@ class Commands(cmd.Cmd):
                 )
                 print("To play again, type 'restart'")
             else:
-                self.game.get_game()
+                pass
         else:
             print("You cannot attack right now")
 
@@ -370,7 +370,7 @@ class Commands(cmd.Cmd):
         if self.game.state == "Swapping Item":
             if line.title() in item_names:
                 self.game.drop_item(line.lower().strip())
-                self.game.player.add_item(
+                self.game.get_player().add_item(
                     self.game.room_item[0], self.game.room_item[1]
                 )
                 self.game.room_item = None
@@ -420,6 +420,7 @@ class Commands(cmd.Cmd):
                 self.game.get_game()
         else:
             print("Cannot run when not being attacked")
+        self.game.get_game()
 
     def do_cower(self, line):
         """

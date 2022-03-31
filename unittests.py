@@ -1,9 +1,6 @@
 import unittest
 from os.path import exists
 from main import Commands
-from classes.directions import Direction as d
-from classes.game import Game
-from classes.player import Player
 from classes.tile import *
 
 

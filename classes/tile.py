@@ -16,8 +16,8 @@ class Tile:
         if doors is None:
             doors = []
         self.name = name
-        self.x = x  # x will represent the tiles position horizontally
-        self.y = y  # y will represent the tiles position vertically
+        self.x = x
+        self.y = y
         self.effect = effect
         self.doors = doors
         self.entrance = entrance
@@ -60,7 +60,8 @@ class Tile:
             self.set_entrance(d.NORTH)
             return
 
-    def rotate_tile(self):  # Will rotate the tile 1 position clockwise
+    # Will rotate the tile one position clockwise
+    def rotate_tile(self):
         for door in self.doors:
             if door == d.NORTH:
                 self.change_door_position(self.doors.index(door), d.EAST)
