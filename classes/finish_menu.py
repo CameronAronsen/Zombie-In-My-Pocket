@@ -91,6 +91,9 @@ class FinishScreen():
         self.fig = Figure(figsize=(5, 5), dpi=100)
         self.ax = self.fig.add_axes([0.1, 0.1, 0.8, 0.8])
         self.ax.bar(self.titles, self.data)
+        self.ax.set_title("Player Stats")
+        self.ax.set_xlabel("Stats")
+        self.ax.set_ylabel("Value")
 
         self.canvas = FigureCanvasTkAgg(self.fig, self.window)
         self.canvas.draw()
