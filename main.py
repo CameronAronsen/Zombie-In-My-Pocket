@@ -297,8 +297,9 @@ class Commands(cmd.Cmd):
                     "succumbed to the zombie horde"
                 )
                 print("To play again, type 'restart'")
+                self.game.lose_game()
             else:
-                pass
+                self.game.get_game()
         else:
             print("You cannot attack right now")
 

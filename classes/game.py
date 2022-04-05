@@ -218,8 +218,6 @@ class Game:
         self, x, y
     ):
         if self.get_current_tile().type == "Indoor":
-            if len(self.indoor_tiles) == 0:
-                return print("No more indoor tiles")
             if (
                 self.get_current_tile().name == "Dining Room" and
                 self.current_move_direction ==
@@ -231,6 +229,9 @@ class Game:
                 tile.set_y(y)
                 self.chosen_tile = tile
             else:
+                if len(self.indoor_tiles) == 0:
+                    print("No more indoor tiles")
+                    return
                 tile = self.indoor_tiles[
                     0
                 ]
@@ -607,7 +608,6 @@ class Game:
         self.can_cower = True
         self.player.add_health(-damage)
         if self.player.get_health() <= 0:
-            self.lose_game()
             return
         else:
             self.current_zombies = 0
