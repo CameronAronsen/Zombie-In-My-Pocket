@@ -218,8 +218,9 @@ class Game:
         self, x, y
     ):
         if self.get_current_tile().type == "Indoor":
-            if len(self.outdoor_tiles) == 0:
-                return print("No more outdoor tiles")
+            if len(self.indoor_tiles) == 0:
+                print("No more indoor tiles")
+                return
             if (
                 self.get_current_tile().name == "Dining Room" and
                 self.current_move_direction ==
@@ -231,9 +232,6 @@ class Game:
                 tile.set_y(y)
                 self.chosen_tile = tile
             else:
-                if len(self.indoor_tiles) == 0:
-                    print("No more indoor tiles")
-                    return
                 tile = self.indoor_tiles[
                     0
                 ]
@@ -241,6 +239,8 @@ class Game:
                 tile.set_y(y)
                 self.chosen_tile = tile
         elif self.get_current_tile().type == "Outdoor":
+            if len(self.outdoor_tiles) == 0:
+                return print("No more outdoor tiles")
             tile = self.outdoor_tiles[0]
             tile.set_x(x)
             tile.set_y(y)
