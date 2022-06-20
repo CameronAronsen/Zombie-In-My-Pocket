@@ -74,6 +74,7 @@ class Game:
         self.dev_cards_used = 0
         self.tiles_placed = 0
         self.attack_count = 0
+        self.difficulty = None
 
     #  Run to initialise the game
     def start_game(self):
@@ -87,7 +88,7 @@ class Game:
                 tile.name == "Foyer"
             ):
                 self.chosen_tile = tile
-                self.state = "Rotating"
+                self.state = "Choosing Difficulty"
                 break
 
     # Tells the player the current status of the game
@@ -105,6 +106,13 @@ class Game:
                 " Once you are happy with the door position"
                 " you can place the tile with the place command"
             )
+        if self.state == "Choosing Difficulty":
+            print(
+                "Select the difficulty of the game by typing the difficulty\n"
+                "Difficulties: Easy, Medium, Hard\n"
+                "e.g. 'difficulty Easy'"
+            )
+            return
         if self.state == "Choosing Door":
             s = (
                 "Choose where to place a new door"
@@ -132,6 +140,7 @@ class Game:
             f"--------------------------------------\n"
             f"It is {self.get_time()} pm \n"
             f"Holding totem: {self.player.get_totem()} \n"
+            f"Game Difficulty: {self.difficulty} \n"
             f"--------------------------------------"
             f"--------------------------------------\n"
             f"The player currently has {self.player.get_health()} health \n"

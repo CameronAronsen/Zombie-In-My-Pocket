@@ -6,6 +6,7 @@ from classes.directions import Direction as d
 from classes.game import Game
 from classes.player import Player
 from classes.tile import *
+from classes.difficulty import *
 
 
 class Commands(cmd.Cmd):
@@ -43,6 +44,30 @@ class Commands(cmd.Cmd):
             self.game.get_game()
         else:
             print("Game has already Started")
+
+    def do_difficulty(self, line):
+        """
+        Selects the games difficulty
+
+        Required State: Choosing Difficulty
+
+        Syntax: difficulty <difficulty>
+        """
+        line = line.lower().strip()
+        if self.game.state == "Choosing Difficulty":
+            if line == "easy":
+                difficulty = EasyDifficulty(self.game)
+                difficulty.set_difficulty()
+            elif line == "medium":
+                difficulty = MediumDifficulty(self.game)
+                difficulty.set_difficulty()
+            else:
+                difficulty = HardDifficulty(self.game)
+                difficulty.set_difficulty()
+            self.game.state = "Rotating"
+            self.game.get_game()
+        else:
+            print("Cannot Set Difficulty Right Now")
 
     def do_rotate(self, line):
         """
