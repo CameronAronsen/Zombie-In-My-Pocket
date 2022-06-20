@@ -5,6 +5,8 @@ from classes.devcard import DevCard
 from classes.tile import *
 from classes.database import Database
 from classes.finish_menu import FinishScreen
+from classes.indoor_factory import IndoorFactory
+from classes.outdoor_factory import OutdoorFactory
 
 
 class Game:
@@ -198,15 +200,21 @@ class Game:
     # Loads tiles from database
     def load_tiles(self):
         tiles = self.database.get_tiles()
+        indoor_factory = IndoorFactory()
+        outdoor_factory = OutdoorFactory()
         for tile in tiles:
             doors = self.resolve_doors(tile[4], tile[5], tile[6], tile[7])
             if tile[3] == "Outdoor":
-                new_tile = OutdoorTile(tile[1], tile[2], doors)
+                new_tile = outdoor_factory.create_tile(name=tile[1],
+                                                       effect=tile[2],
+                                                       doors=doors)
                 if tile[1] == "Patio":
                     new_tile.set_entrance(d.NORTH)
                 self.outdoor_tiles.append(new_tile)
             if tile[3] == "Indoor":
-                new_tile = IndoorTile(tile[1], tile[2], doors)
+                new_tile = indoor_factory.create_tile(name=tile[1],
+                                                      effect=tile[2],
+                                                      doors=doors)
                 if tile[1] == "Dining Room":
                     new_tile.set_entrance(d.NORTH)
                 self.indoor_tiles.append(new_tile)
