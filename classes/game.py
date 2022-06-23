@@ -562,7 +562,6 @@ class Game:
     # Call if state is attacking, *items islist of items the player is using
     def trigger_attack(self, *item):
         player_attack = self.player.get_attack()
-        zombies = self.current_zombies
         if len(item) == 2:
             if "oil" in item and "candle" in item:
                 print(
@@ -617,7 +616,11 @@ class Game:
                 print("You cannot use this item right now, try again")
                 return
 
+        self.trigger_damage(player_attack)
+
+    def trigger_damage(self, player_attack):
         # Calculate damage on the player
+        zombies = self.current_zombies
         damage = zombies - player_attack
         if damage < 0:
             damage = 0
@@ -630,7 +633,8 @@ class Game:
             self.current_zombies = 0
             if self.get_current_tile().name == "Garden" or "Kitchen":
                 self.trigger_room_effect(self.get_current_tile().name)
-            self.state = "Moving"
+            self.state = "Moving"  
+
 
     # Player runs away from the zombies into another room
     def trigger_run(self, direction, health_lost=-1):
