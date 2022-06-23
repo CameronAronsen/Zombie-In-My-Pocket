@@ -29,14 +29,14 @@ class Controller():
     def difficulty(self, line):
         if self.game.state == "Choosing Difficulty":
             if line == "easy":
-                difficulty = EasyDifficulty(self.game)
-                difficulty.set_difficulty()
+                self.game.get_player().set_difficulty(EasyDifficulty(self.game))
+                self.game.get_player().trigger_difficulty()
             elif line == "medium":
-                difficulty = MediumDifficulty(self.game)
-                difficulty.set_difficulty()
+                self.game.get_player().set_difficulty(MediumDifficulty(self.game))
+                self.game.get_player().trigger_difficulty()
             else:
-                difficulty = HardDifficulty(self.game)
-                difficulty.set_difficulty()
+                self.game.get_player().set_difficulty(HardDifficulty(self.game))
+                self.game.get_player().trigger_difficulty()
             self.game.state = "Rotating"
             self.game.get_game()
         else:

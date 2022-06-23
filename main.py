@@ -29,7 +29,7 @@ class Commands(cmd.Cmd):
                 print("File not found")
 
     def get_game(self):
-        return self.game
+        return self.controller.get_game()
 
     def do_start(self, line):
         """

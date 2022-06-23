@@ -29,4 +29,3 @@ class HardDifficulty(AbstractDifficulty):
         player = self.game.get_player()
         player.set_health(4)
         player.set_attack(1)
-        
